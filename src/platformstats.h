@@ -23,3 +23,6 @@ int get_stats(struct cpustat *st, int cpunum);
 
 int print_ram_memory_utilization(int verbose_flag, char* filename);
 int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable);
+
+int print_swap_memory_utilization(int verbose_flag, char* filename);
+int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFree);

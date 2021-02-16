@@ -280,6 +280,81 @@ int print_ram_memory_utilization(int verbose_flag, char* filename)
 /*****************************************************************************/
 /*
 *
+* This API scans the following information about physical swap memory:
+* SwapTotal: Total usable physical swap memory
+* SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
+* and is temporarily on the disk.
+*
+* @param        SwapTotal: Total usable physical swap size
+* @param        SwapFree: amount of swap memory free
+*
+* @return       Error code.
+*
+* @note         Internal API.
+*
+******************************************************************************/
+int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFree)
+{
+	FILE *fp;
+
+        fp = fopen("/proc/meminfo", "r");
+
+        if(fp == NULL)
+        {
+                printf("Unable to open /proc/stat. Returned errono: %d", errno);
+                return(errno);
+        }
+        else
+        {
+		char buff[80];
+
+		skip_lines(fp,14);
+		fscanf(fp," %s %ld",buff,SwapTotal);
+
+		skip_lines(fp,1);
+		fscanf(fp," %s %ld",buff,SwapFree);
+
+		fclose(fp);
+	}
+
+	return(0);
+
+}
+
+/*****************************************************************************/
+/*
+*
+* This API prints the following information about swap memory:
+* SwapTotal: Total usable physical swap memory
+* SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
+* and is temporarily on the disk.
+*
+* @param        verbose_flag: Enable verbose prints
+* @param        filename: Print to logfile
+*
+* @return       Error code.
+*
+* @note         None.
+*
+******************************************************************************/
+int print_swap_memory_utilization(int verbose_flag, char* filename)
+{
+	unsigned long SwapTotal=0, SwapFree=0;
+	int mem_util_ret;
+
+	mem_util_ret = 0;
+
+	mem_util_ret = get_swap_memory_utilization(&SwapTotal, &SwapFree);
+
+	printf("SwapTotal: %ld kB\n",SwapTotal);
+	printf("SwapFree: %ld kB\n",SwapFree);
+
+	return(mem_util_ret);
+
+}
+/*****************************************************************************/
+/*
+*
 * This API calls all other APIs that read, compute and print different platform
 * stats
 *
@@ -300,5 +375,8 @@ void print_all_stats(int verbose_flag, char*filename, int interval)
 
 	printf("----------RAM UTILIZATION-----------\n");
 	print_ram_memory_utilization(verbose_flag, filename);
+
+	printf("----------SWAP MEM UTILIZATION-----------\n");
+	print_swap_memory_utilization(verbose_flag, filename);
 
 }
