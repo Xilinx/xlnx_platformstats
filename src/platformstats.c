@@ -189,6 +189,97 @@ int print_cpu_utilization(int verbose_flag, char*filename)
 /*****************************************************************************/
 /*
 *
+* This API scans the following information about physical memory:
+* MemTotal: Total usable physical ram
+* MemFree: The amount of physical ram, in KB, left unused by the system
+* MemAvailable: An estimate on how much memory is available for starting new
+* applications, without swapping.It can be timated from MemFree, Active(file),
+* Inactive(file), and SReclaimable, as well as the "low"
+* watermarks from /proc/zoneinfo.
+*
+* @param        MemTotal: Total usable physical ram size
+* @param        MemFree: amount of RAM left unsused
+* @param        MemAvailable: estimate of amount of memory available to start a new
+* app
+*
+* @return       Error code.
+*
+* @note         Internal API.
+*
+******************************************************************************/
+int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable)
+{
+	//read first three lines of file
+	//print to terminal
+	FILE *fp;
+
+        fp = fopen("/proc/meminfo", "r");
+
+        if(fp == NULL)
+        {
+                printf("Unable to open /proc/stat. Returned errono: %d", errno);
+                return(errno);
+        }
+        else
+        {
+		char buff[80];
+
+		fscanf(fp," %s %ld",buff,MemTotal);
+		skip_lines(fp,1);
+
+		fscanf(fp," %s %ld",buff,MemFree);
+		skip_lines(fp,1);
+
+		fscanf(fp, "%s %ld",buff,MemAvailable);
+
+		fclose(fp);
+	}
+
+	return(0);
+
+}
+
+/*****************************************************************************/
+/*
+*
+* This API prints the following information about physical memory:
+* MemTotal: Total usable physical ram
+* MemFree: The amount of physical ram, in KB, left unused by the system
+* MemAvailable: An estimate on how much memory is available for starting new
+* applications, without swapping.It can be timated from MemFree, Active(file),
+* Inactive(file), and SReclaimable, as well as the "low"
+* watermarks from /proc/zoneinfo.
+*
+* @param        verbose_flag: Enable verbose prints
+* @param        filename: Print to logfile
+* @param        MemAvailable: estimate of amount of memory available to start a new
+* app
+*
+* @return       Error code.
+*
+* @note         None.
+*
+******************************************************************************/
+int print_ram_memory_utilization(int verbose_flag, char* filename)
+{
+	unsigned long MemTotal=0, MemFree=0, MemAvailable=0;
+	int mem_util_ret;
+
+	mem_util_ret = 0;
+
+	mem_util_ret = get_ram_memory_utilization(&MemTotal, &MemFree, &MemAvailable);
+
+	printf("MemTotal: %ld kB\n",MemTotal);
+	printf("MemFree: %ld kB\n", MemFree);
+	printf("MemAvailable: %ld kB\n\n", MemAvailable);
+
+	return(mem_util_ret);
+
+}
+
+/*****************************************************************************/
+/*
+*
 * This API calls all other APIs that read, compute and print different platform
 * stats
 *
@@ -204,5 +295,10 @@ int print_cpu_utilization(int verbose_flag, char*filename)
 ******************************************************************************/
 void print_all_stats(int verbose_flag, char*filename, int interval)
 {
+	printf("----------CPU UTILIZATION-----------\n");
 	print_cpu_utilization(verbose_flag, filename);
+
+	printf("----------RAM UTILIZATION-----------\n");
+	print_ram_memory_utilization(verbose_flag, filename);
+
 }

@@ -21,3 +21,5 @@ double calculate_load(struct cpustat *prev, struct cpustat *curr);
 int print_cpu_stats(char* filename,struct cpustat *st, int cpu_id);
 int get_stats(struct cpustat *st, int cpunum);
 
+int print_ram_memory_utilization(int verbose_flag, char* filename);
+int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable);
