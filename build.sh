@@ -3,8 +3,8 @@ make clean
 make
 
 cd ../app/
-rm -rf ../main
+rm -rf ../platformstats
 make clean
 make
-cp main ../
+cp platformstats ../
 

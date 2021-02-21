@@ -13,7 +13,7 @@ all: build
 build: $(APPSTMPS)
 
 %.out: %.o
-	$(CC) -o main main.o -L$(LIBDIR) -lplatformstats
+	$(CC) -o platformstats main.o -L$(LIBDIR) -lplatformstats
 
 %.o: %.c
 	$(CC) -I$(INCLUDEDIR) $(CFLAGS) -c main.c -o main.o
