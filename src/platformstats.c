@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <string.h>
 #include <sys/sysinfo.h>
 
 #include "platformstats.h"
@@ -352,6 +354,238 @@ int print_swap_memory_utilization(int verbose_flag, char* filename)
 	return(mem_util_ret);
 
 }
+
+/*****************************************************************************/
+/*
+*
+* This API reads the sysfs enteries for a given sysfs file
+*
+* @param	filename: sysfs path
+* @param	value: value read from sysfs entry
+*
+* @return       None
+*
+* @note         None.
+*
+******************************************************************************/
+int read_sysfs_entry(char* filename, char* value)
+{
+
+	FILE *fp;
+
+	fp = fopen(filename,"r");
+
+	if(fp == NULL)
+	{
+		printf("Unable to open %s\n",filename);
+		return(errno);
+	}
+
+	fscanf(fp,"%s",value);
+
+	return(0);
+
+}
+
+/*****************************************************************************/
+/*
+*
+* This API returns the number of hwmon devices registered under /sys/class/hwmon
+*
+* @return       num_hwmon_devices: Number of registered hwmon devices
+*
+* @note         None.
+*
+******************************************************************************/
+int count_hwmon_reg_devices()
+{
+	//find number of hwmon devices listed under
+	int num_hwmon_devices;
+	DIR *d;
+	struct dirent *dir;
+
+	num_hwmon_devices = 0;
+	d = opendir("/sys/class/hwmon");
+
+	if(!d)
+	{
+		printf("Unable to open /sys/class/hwmon path\n");
+		return(errno);
+	}
+
+        while((dir = readdir(d)) != NULL)
+        {
+		if(strstr(dir->d_name, "hwmon"))
+		{
+			num_hwmon_devices++;
+		}
+        }
+
+        closedir(d);
+
+	return(num_hwmon_devices);
+}
+
+/*****************************************************************************/
+/*
+*
+* This API returns hwmon_id of the specified device:
+*
+* @param        name: device name for which hwmon_id needs to be identified
+* @param        filename: Print to logfile
+*
+* @return       hwmon_id
+*
+* @note         None.
+*
+******************************************************************************/
+int get_device_hwmon_id(int verbose_flag, char* name)
+{
+	//find number of hwmon devices listed under
+	int num_hwmon_devices,hwmon_id;
+	char hwmon_id_str[50];
+	char *device_name;
+	char *filename;
+
+	filename = malloc(255);
+	device_name = malloc(255);
+
+	hwmon_id=-1;
+
+	num_hwmon_devices = count_hwmon_reg_devices();
+
+	for(hwmon_id = 0; hwmon_id < num_hwmon_devices; hwmon_id++)
+	{
+		sprintf(hwmon_id_str,"%d",hwmon_id);
+		strcpy(filename,"/sys/class/hwmon/hwmon");
+		strcat(filename,hwmon_id_str);
+		strcat(filename,"/name");
+
+		read_sysfs_entry(filename,device_name);
+
+		if(!strcmp(name,device_name))
+		{
+			return(hwmon_id);
+		}
+
+		if(verbose_flag)
+		{
+			printf("filename %s\n",filename);
+			printf("device_name = %s\n",device_name);
+		}
+	}
+
+	free(filename);
+	free(device_name);
+	return(-1);
+}
+
+/*****************************************************************************/
+/*
+*
+* This API prints the following information about power utilization for ina260:
+* in1_input: Voltage input value.
+* curr1_input: Current input value.
+* power1_input: Instantaneous power use
+*
+* @param        verbose_flag: Enable verbose prints
+* @param        filename: Print to logfile
+*
+* @return       Error code.
+*
+* @note         None.
+*
+******************************************************************************/
+int print_ina260_power_info(int verbose_flag)
+{
+	int hwmon_id;
+	long total_power, total_current, total_voltage;
+	FILE *fp;
+	char filename[255];
+	char hwmon_id_str[255];
+
+	char base_filepath[] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260_u14");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	printf("hwmon device found, device_id is %d\n",hwmon_id);
+
+	sprintf(hwmon_id_str,"%d",hwmon_id);
+	strcat(base_filepath,hwmon_id_str);
+
+	//if "power" file exists then read power value
+	strcpy(filename,base_filepath);
+	strcat(filename,"/power1_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&total_power);
+	fclose(fp);
+	printf("ina260_u14 total power: %ld microWatt\n",total_power);
+
+	//if "curr" file exists then read curr value
+	strcpy(filename,base_filepath);
+	strcat(filename,"/curr1_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&total_current);
+	fclose(fp);
+	printf("ina260_u14 total current: %ld mA\n",total_current);
+
+
+	//if "voltage" file exists then read voltage value
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in1_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&total_voltage);
+	fclose(fp);
+	printf("ina260_u14 total voltage: %ld mV\n",total_voltage);
+
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+*
+* This API prints the following information about power utilization for the system:
+*
+* @param        verbose_flag: Enable verbose prints
+* @param        filename: Print to logfile
+*
+* @return       Error code.
+*
+* @note         None.
+*
+******************************************************************************/
+int print_power_utilization(int verbose_flag, char* filename)
+{
+	print_ina260_power_info(verbose_flag);
+
+	return(0);
+}
+
 /*****************************************************************************/
 /*
 *
@@ -378,5 +612,9 @@ void print_all_stats(int verbose_flag, char*filename, int interval)
 
 	printf("----------SWAP MEM UTILIZATION-----------\n");
 	print_swap_memory_utilization(verbose_flag, filename);
+
+	printf("----------POWER UTILIZATION-----------\n");
+	print_power_utilization(verbose_flag, filename);
+
 
 }
