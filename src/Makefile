@@ -1,6 +1,6 @@
 .PHONY:	clean
 
-CC =  gcc
+CC ?=  gcc
 CP = cp
 CFLAGS 	+= -Wall -Werror
 LDFLAGS += -shared

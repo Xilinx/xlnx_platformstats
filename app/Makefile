@@ -1,6 +1,6 @@
 .PHONY:	clean
 
-CC =  gcc
+CC ?=  gcc
 CFLAGS = -Wall -Wextra
 LIBDIR = ../src
 INCLUDEDIR = ../include/platformstats
