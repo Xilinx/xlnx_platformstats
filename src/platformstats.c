@@ -531,7 +531,7 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_power);
 	fclose(fp);
-	printf("ina260_u14 total power: %ld microWatt\n",total_power);
+	printf("ina260_u14 total power: %ld mW\n",(total_power)/1000);
 
 	//if "curr" file exists then read curr value
 	strcpy(filename,base_filepath);
@@ -569,6 +569,203 @@ int print_ina260_power_info(int verbose_flag)
 /*****************************************************************************/
 /*
 *
+* This API prints the following information from sysmon driver:
+* in1_input: Voltage input value.
+* curr1_input: Current input value.
+* power1_input: Instantaneous power use
+*
+* @param        verbose_flag: Enable verbose prints
+* @param        filename: Print to logfile
+*
+* @return       Error code.
+*
+* @note         None.
+*
+******************************************************************************/
+int print_sysmon_power_info(int verbose_flag)
+{
+	int hwmon_id;
+	FILE *fp;
+	char filename[255];
+	char hwmon_id_str[255];
+	long LPD_TEMP, FPD_TEMP, PL_TEMP;
+	long VCC_PSPLL, PL_VCCINT, VOLT_DDRS, VCC_PSINTFP, VCC_PS_FPD;
+	long PS_IO_BANK_500, VCC_PS_GTR, VTT_PS_GTR;
+
+	char base_filepath[] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(verbose_flag,"ams");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ams under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	printf("hwmon device found, device_id is %d \n",hwmon_id);
+
+	sprintf(hwmon_id_str,"%d",hwmon_id);
+	strcat(base_filepath,hwmon_id_str);
+
+	//Print temperature values
+	strcpy(filename,base_filepath);
+	strcat(filename,"/temp1_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&LPD_TEMP);
+	fclose(fp);
+	printf("ams LPD temperature: %ld C\n",(LPD_TEMP)/1000);
+
+	//FPD temp
+	strcpy(filename,base_filepath);
+	strcat(filename,"/temp2_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&FPD_TEMP);
+	fclose(fp);
+	printf("ams FPD temperature: %ld C\n",(FPD_TEMP)/1000);
+
+	//PL temp
+	strcpy(filename,base_filepath);
+	strcat(filename,"/temp3_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&PL_TEMP);
+	fclose(fp);
+	printf("ams PL temperature: %ld C\n",(PL_TEMP)/1000);
+
+	//VCC_PSPLL
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in1_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&VCC_PSPLL);
+	fclose(fp);
+	printf("ams System PLLs voltage: %ld mV\n",VCC_PSPLL);
+
+	//PL_VCCINT
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in3_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&PL_VCCINT);
+	fclose(fp);
+	printf("ams PL internal voltage: %ld mV\n",PL_VCCINT);
+
+	//VOLT_DDRS
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in6_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&VOLT_DDRS);
+	fclose(fp);
+	printf("ams 6 DDR I/O PLLs Volts: %ld mV\n",VOLT_DDRS);
+
+	//VCC_PSINTFP
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in7_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&VCC_PSINTFP);
+	fclose(fp);
+	printf("ams VCC PSINTFP DDR voltage: %ld mV\n",VCC_PSINTFP);
+
+	//VCC_PS_FPD
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in9_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&VCC_PS_FPD);
+	fclose(fp);
+	printf("ams VCC PS FPD voltage: %ld mV\n",VCC_PS_FPD);
+
+	// PS_IO_BANK_500
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in13_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&PS_IO_BANK_500);
+	fclose(fp);
+	printf("ams PS IO Bank 500 voltage: %ld mV\n",PS_IO_BANK_500);
+
+	//VCC_PS_GTR
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in16_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&VCC_PS_GTR);
+	fclose(fp);
+	printf("ams VCC PS GTR voltage: %ld mV\n",VCC_PS_GTR);
+
+	//VTT_PS_GTR
+	strcpy(filename,base_filepath);
+	strcat(filename,"/in17_input");
+
+	fp = fopen(filename,"r");
+	if(fp == NULL)
+	{
+		printf("unable to open %s\n",filename);
+	}
+
+	fscanf(fp,"%ld",&VTT_PS_GTR);
+	fclose(fp);
+	printf("ams VTT PS GTR voltage: %ld mV\n",VTT_PS_GTR);
+
+	return(0);
+}
+/*****************************************************************************/
+/*
+*
 * This API prints the following information about power utilization for the system:
 *
 * @param        verbose_flag: Enable verbose prints
@@ -582,6 +779,7 @@ int print_ina260_power_info(int verbose_flag)
 int print_power_utilization(int verbose_flag, char* filename)
 {
 	print_ina260_power_info(verbose_flag);
+	print_sysmon_power_info(verbose_flag);
 
 	return(0);
 }
