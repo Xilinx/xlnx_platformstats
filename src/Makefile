@@ -2,7 +2,7 @@
 
 CC ?=  gcc
 CP = cp
-CFLAGS 	+= -Wall -Werror
+CFLAGS 	+= -Wall
 LDFLAGS += -shared
 
 SOURCES = $(shell echo *.c)
