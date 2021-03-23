@@ -531,7 +531,7 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_power);
 	fclose(fp);
-	printf("ina260_u14 total power: %ld mW\n",(total_power)/1000);
+	printf("SOM total power: %ld mW\n",(total_power)/1000);
 
 	//if "curr" file exists then read curr value
 	strcpy(filename,base_filepath);
@@ -545,7 +545,7 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_current);
 	fclose(fp);
-	printf("ina260_u14 total current: %ld mA\n",total_current);
+	printf("SOM total current: %ld mA\n",total_current);
 
 
 	//if "voltage" file exists then read voltage value
@@ -560,7 +560,7 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_voltage);
 	fclose(fp);
-	printf("ina260_u14 total voltage: %ld mV\n",total_voltage);
+	printf("SOM total voltage: %ld mV\n",total_voltage);
 
 
 	return(0);
