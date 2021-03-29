@@ -282,6 +282,80 @@ int print_ram_memory_utilization(int verbose_flag, char* filename)
 /*****************************************************************************/
 /*
 *
+* This API prints the following information about physical memory:
+* CMATotal: Total CMA information
+* CMAFree: The CMA alloc free information
+*
+* @param        verbose_flag: Enable verbose prints
+* @param        filename: Print to logfile
+*
+* @return       Error code.
+*
+* @note         Internal API.
+*
+******************************************************************************/
+int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree)
+{
+	FILE *fp;
+
+        fp = fopen("/proc/meminfo", "r");
+
+        if(fp == NULL)
+        {
+                printf("Unable to open /proc/stat. Returned errono: %d", errno);
+                return(errno);
+        }
+        else
+        {
+		char buff[80];
+
+		skip_lines(fp,37);
+		fscanf(fp," %s %ld",buff,CmaTotal);
+
+		skip_lines(fp,1);
+		fscanf(fp," %s %ld",buff,CmaFree);
+
+		fclose(fp);
+	}
+
+	return(0);
+
+}
+
+/*****************************************************************************/
+/*
+*
+* This API prints the following information about physical memory:
+* CMATotal: Total CMA information
+* CMAFree: The CMA alloc free information
+*
+* @param        verbose_flag: Enable verbose prints
+* @param        filename: Print to logfile
+*
+* @return       Error code.
+*
+* @note         None.
+*
+******************************************************************************/
+int print_cma_utilization(int verbose_flag, char* filename)
+{
+	unsigned long CmaTotal=0, CmaFree=0;
+	int cma_util_ret;
+
+	cma_util_ret = 0;
+
+	cma_util_ret = get_cma_utilization(&CmaTotal, &CmaFree);
+
+	printf("CmaTotal: %ld kB\n",CmaTotal);
+	printf("CmaFree: %ld kB\n", CmaFree);
+
+	return(cma_util_ret);
+
+}
+
+/*****************************************************************************/
+/*
+*
 * This API scans the following information about physical swap memory:
 * SwapTotal: Total usable physical swap memory
 * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
@@ -814,5 +888,7 @@ void print_all_stats(int verbose_flag, char*filename, int interval)
 	printf("----------POWER UTILIZATION-----------\n");
 	print_power_utilization(verbose_flag, filename);
 
+	printf("----------CMA BUFFER UTILIZATION ------\n");
+	print_cma_utilization(verbose_flag, filename);
 
 }
