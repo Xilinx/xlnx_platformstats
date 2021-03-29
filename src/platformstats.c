@@ -693,7 +693,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&LPD_TEMP);
 	fclose(fp);
-	printf("ams LPD temperature: %ld C\n",(LPD_TEMP)/1000);
+	printf("LPD temperature: %ld C\n",(LPD_TEMP)/1000);
 
 	//FPD temp
 	strcpy(filename,base_filepath);
@@ -707,7 +707,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&FPD_TEMP);
 	fclose(fp);
-	printf("ams FPD temperature: %ld C\n",(FPD_TEMP)/1000);
+	printf("FPD temperature: %ld C\n",(FPD_TEMP)/1000);
 
 	//PL temp
 	strcpy(filename,base_filepath);
@@ -721,7 +721,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&PL_TEMP);
 	fclose(fp);
-	printf("ams PL temperature: %ld C\n",(PL_TEMP)/1000);
+	printf("PL temperature: %ld C\n",(PL_TEMP)/1000);
 
 	//VCC_PSPLL
 	strcpy(filename,base_filepath);
@@ -735,7 +735,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VCC_PSPLL);
 	fclose(fp);
-	printf("ams System PLLs voltage: %ld mV\n",VCC_PSPLL);
+	printf("System PLLs voltage: %ld mV\n",VCC_PSPLL);
 
 	//PL_VCCINT
 	strcpy(filename,base_filepath);
@@ -749,7 +749,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&PL_VCCINT);
 	fclose(fp);
-	printf("ams PL internal voltage: %ld mV\n",PL_VCCINT);
+	printf("PL internal voltage: %ld mV\n",PL_VCCINT);
 
 	//VOLT_DDRS
 	strcpy(filename,base_filepath);
@@ -763,7 +763,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VOLT_DDRS);
 	fclose(fp);
-	printf("ams 6 DDR I/O PLLs Volts: %ld mV\n",VOLT_DDRS);
+	printf("6 DDR I/O PLLs Volts: %ld mV\n",VOLT_DDRS);
 
 	//VCC_PSINTFP
 	strcpy(filename,base_filepath);
@@ -777,7 +777,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VCC_PSINTFP);
 	fclose(fp);
-	printf("ams VCC PSINTFP DDR voltage: %ld mV\n",VCC_PSINTFP);
+	printf("VCC PSINTFP DDR voltage: %ld mV\n",VCC_PSINTFP);
 
 	//VCC_PS_FPD
 	strcpy(filename,base_filepath);
@@ -791,7 +791,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VCC_PS_FPD);
 	fclose(fp);
-	printf("ams VCC PS FPD voltage: %ld mV\n",VCC_PS_FPD);
+	printf("VCC PS FPD voltage: %ld mV\n",VCC_PS_FPD);
 
 	// PS_IO_BANK_500
 	strcpy(filename,base_filepath);
@@ -805,7 +805,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&PS_IO_BANK_500);
 	fclose(fp);
-	printf("ams PS IO Bank 500 voltage: %ld mV\n",PS_IO_BANK_500);
+	printf("PS IO Bank 500 voltage: %ld mV\n",PS_IO_BANK_500);
 
 	//VCC_PS_GTR
 	strcpy(filename,base_filepath);
@@ -819,7 +819,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VCC_PS_GTR);
 	fclose(fp);
-	printf("ams VCC PS GTR voltage: %ld mV\n",VCC_PS_GTR);
+	printf("VCC PS GTR voltage: %ld mV\n",VCC_PS_GTR);
 
 	//VTT_PS_GTR
 	strcpy(filename,base_filepath);
@@ -833,7 +833,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VTT_PS_GTR);
 	fclose(fp);
-	printf("ams VTT PS GTR voltage: %ld mV\n",VTT_PS_GTR);
+	printf("VTT PS GTR voltage: %ld mV\n",VTT_PS_GTR);
 
 	return(0);
 }
