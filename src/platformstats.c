@@ -161,6 +161,7 @@ int print_cpu_utilization(int verbose_flag, char*filename)
 		return(errno);
 	}
 
+	printf("\nCPU Utilization\n");
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		st0_0[cpu_id].total_util = 0;
@@ -179,7 +180,7 @@ int print_cpu_utilization(int verbose_flag, char*filename)
 			printf("Stats at t1 after 1s\n");
 			print_cpu_stats(filename,&st0_1[cpu_id],cpu_id);
 		}
-		printf("CPU%d utilization: %lf%%\n",cpu_id,st0_1[cpu_id].total_util);
+		printf("CPU%d\t:     %lf%%\n",cpu_id,st0_1[cpu_id].total_util);
 	}
 
 	free(st0_0);
@@ -264,10 +265,11 @@ int print_cpu_frequency(int verbose_flag, char*filename)
 	num_cpus_conf= get_nprocs_conf();
 	cpu_id=0;
 
+	printf("\nCPU Frequency\n");
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		get_cpu_frequency(cpu_id,&cpu_freq);
-		printf("CPU%d MHz : %f\n",cpu_id,cpu_freq);
+		printf("CPU%d\t:    %f MHz\n",cpu_id,cpu_freq);
 	}
 
 	return(0);
@@ -356,9 +358,10 @@ int print_ram_memory_utilization(int verbose_flag, char* filename)
 
 	mem_util_ret = get_ram_memory_utilization(&MemTotal, &MemFree, &MemAvailable);
 
-	printf("MemTotal: %ld kB\n",MemTotal);
-	printf("MemFree: %ld kB\n", MemFree);
-	printf("MemAvailable: %ld kB\n\n", MemAvailable);
+	printf("\nRAM Utilization\n");
+	printf("MemTotal      :     %ld kB\n",MemTotal);
+	printf("MemFree	      :     %ld kB\n", MemFree);
+	printf("MemAvailable  :     %ld kB\n\n", MemAvailable);
 
 	return(mem_util_ret);
 
@@ -431,8 +434,9 @@ int print_cma_utilization(int verbose_flag, char* filename)
 
 	cma_util_ret = get_cma_utilization(&CmaTotal, &CmaFree);
 
-	printf("CmaTotal: %ld kB\n",CmaTotal);
-	printf("CmaFree: %ld kB\n", CmaFree);
+	printf("\nCMA Mem Utilization\n");
+	printf("CmaTotal   :     %ld kB\n",CmaTotal);
+	printf("CmaFree    :     %ld kB\n", CmaFree);
 
 	return(cma_util_ret);
 
@@ -507,8 +511,9 @@ int print_swap_memory_utilization(int verbose_flag, char* filename)
 
 	mem_util_ret = get_swap_memory_utilization(&SwapTotal, &SwapFree);
 
-	printf("SwapTotal: %ld kB\n",SwapTotal);
-	printf("SwapFree: %ld kB\n",SwapFree);
+	printf("\nSwap Mem Utilization\n");
+	printf("SwapTotal    :    %ld kB\n",SwapTotal);
+	printf("SwapFree     :    %ld kB\n\n",SwapFree);
 
 	return(mem_util_ret);
 
@@ -667,13 +672,14 @@ int print_ina260_power_info(int verbose_flag)
 
 	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260_u14");
 
+	printf("\nPower Utilization\n");
 	if(hwmon_id == -1)
 	{
 		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
 		return(0);
 	}
 
-	printf("hwmon device found, device_id is %d\n",hwmon_id);
+	//printf("hwmon device found, device_id is %d\n",hwmon_id);
 
 	sprintf(hwmon_id_str,"%d",hwmon_id);
 	strcat(base_filepath,hwmon_id_str);
@@ -690,7 +696,8 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_power);
 	fclose(fp);
-	printf("SOM total power: %ld mW\n",(total_power)/1000);
+
+	printf("SOM total power    :     %ld mW\n",(total_power)/1000);
 
 	//if "curr" file exists then read curr value
 	strcpy(filename,base_filepath);
@@ -704,7 +711,7 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_current);
 	fclose(fp);
-	printf("SOM total current: %ld mA\n",total_current);
+	printf("SOM total current    :     %ld mA\n",total_current);
 
 
 	//if "voltage" file exists then read voltage value
@@ -719,7 +726,7 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_voltage);
 	fclose(fp);
-	printf("SOM total voltage: %ld mV\n",total_voltage);
+	printf("SOM total voltage\t:     %ld mV\n",total_voltage);
 
 
 	return(0);
@@ -761,7 +768,7 @@ int print_sysmon_power_info(int verbose_flag)
 		return(0);
 	}
 
-	printf("hwmon device found, device_id is %d \n",hwmon_id);
+	//printf("hwmon device found, device_id is %d \n",hwmon_id);
 
 	sprintf(hwmon_id_str,"%d",hwmon_id);
 	strcat(base_filepath,hwmon_id_str);
@@ -778,7 +785,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&LPD_TEMP);
 	fclose(fp);
-	printf("LPD temperature: %ld C\n",(LPD_TEMP)/1000);
 
 	//FPD temp
 	strcpy(filename,base_filepath);
@@ -792,7 +798,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&FPD_TEMP);
 	fclose(fp);
-	printf("FPD temperature: %ld C\n",(FPD_TEMP)/1000);
 
 	//PL temp
 	strcpy(filename,base_filepath);
@@ -806,7 +811,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&PL_TEMP);
 	fclose(fp);
-	printf("PL temperature: %ld C\n",(PL_TEMP)/1000);
 
 	//VCC_PSPLL
 	strcpy(filename,base_filepath);
@@ -820,7 +824,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VCC_PSPLL);
 	fclose(fp);
-	printf("System PLLs voltage: %ld mV\n",VCC_PSPLL);
 
 	//PL_VCCINT
 	strcpy(filename,base_filepath);
@@ -834,7 +837,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&PL_VCCINT);
 	fclose(fp);
-	printf("PL internal voltage: %ld mV\n",PL_VCCINT);
 
 	//VOLT_DDRS
 	strcpy(filename,base_filepath);
@@ -848,7 +850,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VOLT_DDRS);
 	fclose(fp);
-	printf("6 DDR I/O PLLs Volts: %ld mV\n",VOLT_DDRS);
 
 	//VCC_PSINTFP
 	strcpy(filename,base_filepath);
@@ -862,7 +863,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VCC_PSINTFP);
 	fclose(fp);
-	printf("VCC PSINTFP DDR voltage: %ld mV\n",VCC_PSINTFP);
 
 	//VCC_PS_FPD
 	strcpy(filename,base_filepath);
@@ -876,7 +876,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VCC_PS_FPD);
 	fclose(fp);
-	printf("VCC PS FPD voltage: %ld mV\n",VCC_PS_FPD);
 
 	// PS_IO_BANK_500
 	strcpy(filename,base_filepath);
@@ -890,7 +889,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&PS_IO_BANK_500);
 	fclose(fp);
-	printf("PS IO Bank 500 voltage: %ld mV\n",PS_IO_BANK_500);
 
 	//VCC_PS_GTR
 	strcpy(filename,base_filepath);
@@ -904,7 +902,6 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VCC_PS_GTR);
 	fclose(fp);
-	printf("VCC PS GTR voltage: %ld mV\n",VCC_PS_GTR);
 
 	//VTT_PS_GTR
 	strcpy(filename,base_filepath);
@@ -918,7 +915,23 @@ int print_sysmon_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&VTT_PS_GTR);
 	fclose(fp);
-	printf("VTT PS GTR voltage: %ld mV\n",VTT_PS_GTR);
+
+	printf("AMS CTRL\n");
+	printf("System PLLs voltage measurement, VCC_PSLL   		:     %ld mV\n",VCC_PSPLL);
+	printf("PL internal voltage measurement, VCC_PSBATT 		:     %ld mV\n",PL_VCCINT);
+	printf("Voltage measurement for six DDR I/O PLLs, VCC_PSDDR_PLL :     %ld mV\n",VOLT_DDRS);
+	printf("VCC_PSINTFP_DDR voltage measurement         		:     %ld mV\n\n",VCC_PSINTFP);
+
+	printf("PS Sysmon\n");
+	printf("LPD temperature measurement 		    		:     %ld C\n",(LPD_TEMP)/1000);
+	printf("FPD temperature measurement (REMOTE)  		    		:     %ld C\n",(FPD_TEMP)/1000);
+	printf("VCC PS FPD voltage measurement (supply 2)   		:     %ld mV\n",VCC_PS_FPD);
+	printf("PS IO Bank 500 voltage measurement (supply 6)		:     %ld mV\n",PS_IO_BANK_500);
+	printf("VCC PS GTR voltage   					:     %ld mV\n",VCC_PS_GTR);
+	printf("VTT PS GTR voltage    					:     %ld mV\n\n",VTT_PS_GTR);
+
+	printf("PL Sysmon\n");
+	printf("PL temperature    					:     %ld C\n",(PL_TEMP)/1000);
 
 	return(0);
 }
@@ -962,21 +975,15 @@ int print_power_utilization(int verbose_flag, char* filename)
 void print_all_stats(int verbose_flag, char*filename, int interval)
 {
 
-	printf("----------CPU UTILIZATION-----------\n");
 	print_cpu_utilization(verbose_flag, filename);
 
-	printf("----------RAM UTILIZATION-----------\n");
 	print_ram_memory_utilization(verbose_flag, filename);
 
-	printf("----------SWAP MEM UTILIZATION-----------\n");
 	print_swap_memory_utilization(verbose_flag, filename);
 
-	printf("----------POWER UTILIZATION-----------\n");
 	print_power_utilization(verbose_flag, filename);
 
-	printf("----------CMA BUFFER UTILIZATION ------\n");
 	print_cma_utilization(verbose_flag, filename);
 
-	printf("----------CPU FREQUENCY ------\n");
 	print_cpu_frequency(verbose_flag, filename);
 }
