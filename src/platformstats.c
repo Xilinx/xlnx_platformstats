@@ -187,6 +187,91 @@ int print_cpu_utilization(int verbose_flag, char*filename)
 
 	return(0);
 }
+/*****************************************************************************/
+/*
+*
+* This API identifies the number of configured CPUs in the system. For each
+* active CPU it reads the CPU frequency by opening /proc/cpuinfo.
+*
+* @param	verbose_flag: Enable verbose prints on stdout
+* @param	filename: Print to specified logfile
+*
+* @return	cpu_freq.
+*
+* @note		Internal API.
+*
+******************************************************************************/
+
+int get_cpu_frequency(int cpu_id, float* cpu_freq)
+{
+	FILE *fp;
+
+	fp = fopen("/proc/cpuinfo", "r");
+	size_t bytes_read;
+
+	if(fp == NULL)
+	{
+		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		return(errno);
+	}
+	else
+	{
+		skip_lines(fp,(cpu_id*27));
+		char buff[500];
+		char *match;
+
+		bytes_read=fread(buff,sizeof(char),500,fp);
+		fclose(fp);
+
+		if(bytes_read == 0)
+		{
+			return(0);
+		}
+
+		match = strstr(buff,"cpu MHz");
+		buff[bytes_read]='\0';
+		if(match == NULL)
+		{
+			printf("match not found");
+			return(0);
+		}
+
+		sscanf(match,"cpu MHz : %f", cpu_freq);
+	}
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+*
+* This API identifies the number of configured CPUs in the system. For each
+* active CPU it reads the CPU frequency by calling get_cpu_freq and prints it.
+*
+* @param	verbose_flag: Enable verbose prints on stdout
+* @param	filename: Print to specified logfile
+*
+* @return	None.
+*
+* @note		None.
+*
+******************************************************************************/
+int print_cpu_frequency(int verbose_flag, char*filename)
+{
+	int num_cpus_conf, cpu_id;
+	float cpu_freq;
+
+	num_cpus_conf= get_nprocs_conf();
+	cpu_id=0;
+
+	for(; cpu_id < num_cpus_conf; cpu_id++)
+	{
+		get_cpu_frequency(cpu_id,&cpu_freq);
+		printf("CPU%d MHz : %f\n",cpu_id,cpu_freq);
+	}
+
+	return(0);
+}
 
 /*****************************************************************************/
 /*
@@ -876,6 +961,7 @@ int print_power_utilization(int verbose_flag, char* filename)
 ******************************************************************************/
 void print_all_stats(int verbose_flag, char*filename, int interval)
 {
+
 	printf("----------CPU UTILIZATION-----------\n");
 	print_cpu_utilization(verbose_flag, filename);
 
@@ -891,4 +977,6 @@ void print_all_stats(int verbose_flag, char*filename, int interval)
 	printf("----------CMA BUFFER UTILIZATION ------\n");
 	print_cma_utilization(verbose_flag, filename);
 
+	printf("----------CPU FREQUENCY ------\n");
+	print_cpu_frequency(verbose_flag, filename);
 }

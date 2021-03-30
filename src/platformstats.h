@@ -35,3 +35,6 @@ int read_sysfs_entry(char* filename, char* entry);
 
 int print_cma_utilization(int verbose_flag, char* filename);
 int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree);
+
+int print_cpu_frequency(int verbose_flag, char* filename);
+int get_cpu_frequency(int cpu_id, float* cpu_freq);
