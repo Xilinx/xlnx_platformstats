@@ -1,25 +1,43 @@
-PlatformStats
+# Platformstats
 
-#*******************************************************************************
-#
-# Copyright (C) 2020 Xilinx, Inc.  All rights reserved.
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy of
-# this software and associated documentation files (the "Software"), to deal in
-# the Software without restriction, including without limitation the rights to
-# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-# of the Software, and to permit persons to whom the Software is furnished to do
-# so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in all 
-# copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-# AUTHORS OR COPYRIGHT HOLDERS  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
-# SOFTWARE.
-#
-# ******************************************************************************
+A library that provides APIs to print different platform statistics.
+
+## Supported APIs
+
+The library provides following list of APIs
+
+| API     		| Description         				|
+|-----------------	|------------------------------------		|
+| CPU Utilization     	| List and print all active CPU Utilization 	|
+| RAM Utilization 	| Print RAM memory Utilization 		      	|
+| Swap Utilization 	| Print Swap memory Utilization		      	|
+| Power Utilization 	| Print SOM Power Utilization 		      	|
+| CMA Utilization 	| Print CMA memory Utilization 		      	|
+| CPU Frequency 	| List and print all active CPU frequency      	|
+
+## Usage
+Usage: platformstats [options] [stats]
+
+ Options
+*    -i --interval	Specify the decimal value for polling in ms. The default is 1000ms.
+*    -v --verbose	Print verbose messages
+*    -l --logfile	Print output to logfile
+*    -s --stop		Stop any running instances of platformstats
+*    -h --help		Show this usuage.
+
+ List of stats to print
+*    -a --all		Print all supported stats.
+*    -c --cpu-util	Print CPU Utilization.
+*    -r --ram-util	Print RAM Utilization.
+*    -s --swap-util	Print Swap Mem Utilization.
+*    -p --power-util	Print Power Utilization.
+*    -m --cma-util	Print CMA Mem Utilization.
+*    -f --cpu-freq	Print CPU frequency.
+
+## Compile test app
+	cd app/
+	make clean
+	make
+### Compile library
+	cd src/
+	make
