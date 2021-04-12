@@ -27,6 +27,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <platformstats.h>
 
 /************************** Variable Definitions *****************************/
@@ -109,30 +111,35 @@ int main(int argc, char *argv[])
 				break;
 			case 'l':
 				filename = optarg;
+				if(filename)
+				{
+				        int fd = open(filename,O_CREAT |O_WRONLY | O_APPEND, 0755);
+				        dup2(fd,1);
+				}
 				break;
 			case 'h':
 				print_usage();
 				break;
 			case 'a':
-				print_all_stats(verbose_flag,filename);
+				print_all_stats(verbose_flag);
 				break;
 			case 'c':
-				print_cpu_utilization(verbose_flag,filename);
+				print_cpu_utilization(verbose_flag);
 				break;
 			case 'r':
-				print_ram_memory_utilization(verbose_flag,filename);
+				print_ram_memory_utilization(verbose_flag);
 				break;
 			case 's':
-				print_swap_memory_utilization(verbose_flag,filename);
+				print_swap_memory_utilization(verbose_flag);
 				break;
 			case 'p':
-				print_power_utilization(verbose_flag,filename);
+				print_power_utilization(verbose_flag);
 				break;
 			case 'm':
-				print_cma_utilization(verbose_flag,filename);
+				print_cma_utilization(verbose_flag);
 				break;
 			case 'f':
-				print_cpu_frequency(verbose_flag,filename);
+				print_cpu_frequency(verbose_flag);
 				break;
 			default:
 				printf("Incorrect options passed, please see usage");

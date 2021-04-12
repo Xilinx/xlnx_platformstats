@@ -74,7 +74,6 @@ int get_stats(struct cpustat *cpu_stat, int cpu_id)
 *
 * This API prints CPU stats stored in given structure for particular CPU id 
 *
-* @param	filename: Print details to specified logfile
 * @param	cpu_stat: struct that stores CPU stats
 * @param	cpu_id: CPU id for which the details must be caputred.
 *
@@ -83,7 +82,7 @@ int get_stats(struct cpustat *cpu_stat, int cpu_id)
 * @note		Internal API only.
 *
 ******************************************************************************/
-int print_cpu_stats(char *filename,struct cpustat *st, int cpu_id)
+int print_cpu_stats(struct cpustat *st, int cpu_id)
 {
 	printf("CPU%d: %ld %ld %ld %ld %ld %ld %ld\n", cpu_id, (st->user), (st->nice), 
         (st->system), (st->idle), (st->iowait), (st->irq),
@@ -137,14 +136,13 @@ double calculate_load(struct cpustat *prev, struct cpustat *curr)
 * load.
 *
 * @param	verbose_flag: Enable verbose prints on stdout
-* @param	filename: Print to specified logfile
 *
 * @return	None.
 *
 * @note		None.
 *
 ******************************************************************************/
-int print_cpu_utilization(int verbose_flag, char*filename)
+int print_cpu_utilization(int verbose_flag)
 {
 	int num_cpus_conf, cpu_id;
 	struct cpustat *st0_0, *st0_1;
@@ -174,11 +172,10 @@ int print_cpu_utilization(int verbose_flag, char*filename)
 	
 		if(verbose_flag)
 		{
-			filename = NULL;
 			printf("cpu_id=%d\nStats at t0\n",cpu_id);
-			print_cpu_stats(filename,&st0_0[cpu_id],cpu_id);
+			print_cpu_stats(&st0_0[cpu_id],cpu_id);
 			printf("Stats at t1 after 1s\n");
-			print_cpu_stats(filename,&st0_1[cpu_id],cpu_id);
+			print_cpu_stats(&st0_1[cpu_id],cpu_id);
 		}
 		printf("CPU%d\t:     %lf%%\n",cpu_id,st0_1[cpu_id].total_util);
 	}
@@ -195,7 +192,6 @@ int print_cpu_utilization(int verbose_flag, char*filename)
 * active CPU it reads the CPU frequency by opening /proc/cpuinfo.
 *
 * @param	verbose_flag: Enable verbose prints on stdout
-* @param	filename: Print to specified logfile
 *
 * @return	cpu_freq.
 *
@@ -250,14 +246,13 @@ int get_cpu_frequency(int cpu_id, float* cpu_freq)
 * active CPU it reads the CPU frequency by calling get_cpu_freq and prints it.
 *
 * @param	verbose_flag: Enable verbose prints on stdout
-* @param	filename: Print to specified logfile
 *
 * @return	None.
 *
 * @note		None.
 *
 ******************************************************************************/
-int print_cpu_frequency(int verbose_flag, char*filename)
+int print_cpu_frequency(int verbose_flag)
 {
 	int num_cpus_conf, cpu_id;
 	float cpu_freq;
@@ -340,7 +335,6 @@ int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, 
 * watermarks from /proc/zoneinfo.
 *
 * @param        verbose_flag: Enable verbose prints
-* @param        filename: Print to logfile
 * @param        MemAvailable: estimate of amount of memory available to start a new
 * app
 *
@@ -349,7 +343,7 @@ int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, 
 * @note         None.
 *
 ******************************************************************************/
-int print_ram_memory_utilization(int verbose_flag, char* filename)
+int print_ram_memory_utilization(int verbose_flag)
 {
 	unsigned long MemTotal=0, MemFree=0, MemAvailable=0;
 	int mem_util_ret;
@@ -375,7 +369,6 @@ int print_ram_memory_utilization(int verbose_flag, char* filename)
 * CMAFree: The CMA alloc free information
 *
 * @param        verbose_flag: Enable verbose prints
-* @param        filename: Print to logfile
 *
 * @return       Error code.
 *
@@ -418,14 +411,13 @@ int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree)
 * CMAFree: The CMA alloc free information
 *
 * @param        verbose_flag: Enable verbose prints
-* @param        filename: Print to logfile
 *
 * @return       Error code.
 *
 * @note         None.
 *
 ******************************************************************************/
-int print_cma_utilization(int verbose_flag, char* filename)
+int print_cma_utilization(int verbose_flag)
 {
 	unsigned long CmaTotal=0, CmaFree=0;
 	int cma_util_ret;
@@ -495,14 +487,13 @@ int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFre
 * and is temporarily on the disk.
 *
 * @param        verbose_flag: Enable verbose prints
-* @param        filename: Print to logfile
 *
 * @return       Error code.
 *
 * @note         None.
 *
 ******************************************************************************/
-int print_swap_memory_utilization(int verbose_flag, char* filename)
+int print_swap_memory_utilization(int verbose_flag)
 {
 	unsigned long SwapTotal=0, SwapFree=0;
 	int mem_util_ret;
@@ -596,7 +587,6 @@ int count_hwmon_reg_devices()
 * This API returns hwmon_id of the specified device:
 *
 * @param        name: device name for which hwmon_id needs to be identified
-* @param        filename: Print to logfile
 *
 * @return       hwmon_id
 *
@@ -653,7 +643,6 @@ int get_device_hwmon_id(int verbose_flag, char* name)
 * power1_input: Instantaneous power use
 *
 * @param        verbose_flag: Enable verbose prints
-* @param        filename: Print to logfile
 *
 * @return       Error code.
 *
@@ -741,7 +730,6 @@ int print_ina260_power_info(int verbose_flag)
 * power1_input: Instantaneous power use
 *
 * @param        verbose_flag: Enable verbose prints
-* @param        filename: Print to logfile
 *
 * @return       Error code.
 *
@@ -941,14 +929,13 @@ int print_sysmon_power_info(int verbose_flag)
 * This API prints the following information about power utilization for the system:
 *
 * @param        verbose_flag: Enable verbose prints
-* @param        filename: Print to logfile
 *
 * @return       Error code.
 *
 * @note         None.
 *
 ******************************************************************************/
-int print_power_utilization(int verbose_flag, char* filename)
+int print_power_utilization(int verbose_flag)
 {
 	print_ina260_power_info(verbose_flag);
 	print_sysmon_power_info(verbose_flag);
@@ -963,8 +950,6 @@ int print_power_utilization(int verbose_flag, char* filename)
 * stats
 *
 * @param        verbose_flag: Enable verbose prints on stdout
-* @param        filename: Print to specified logfile 
-* @param        interval: The interval these different stats should be queried 
 * and printed
 *
 * @return       None.
@@ -972,18 +957,18 @@ int print_power_utilization(int verbose_flag, char* filename)
 * @note         None.
 *
 ******************************************************************************/
-void print_all_stats(int verbose_flag, char*filename)
+void print_all_stats(int verbose_flag)
 {
 
-	print_cpu_utilization(verbose_flag, filename);
+	print_cpu_utilization(verbose_flag);
 
-	print_ram_memory_utilization(verbose_flag, filename);
+	print_ram_memory_utilization(verbose_flag);
 
-	print_swap_memory_utilization(verbose_flag, filename);
+	print_swap_memory_utilization(verbose_flag);
 
-	print_power_utilization(verbose_flag, filename);
+	print_power_utilization(verbose_flag);
 
-	print_cma_utilization(verbose_flag, filename);
+	print_cma_utilization(verbose_flag);
 
-	print_cpu_frequency(verbose_flag, filename);
+	print_cpu_frequency(verbose_flag);
 }
