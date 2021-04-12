@@ -15,7 +15,7 @@ struct cpustat {
 };
 
 /************************** Function Prototypes  *****************************/
-void print_all_stats(int verbose_flag,char *filename, int interval);
+void print_all_stats(int verbose_flag,char *filename);
 int print_cpu_utilization(int verbose_flag, char*filename);
 double calculate_load(struct cpustat *prev, struct cpustat *curr);
 int print_cpu_stats(char* filename,struct cpustat *st, int cpu_id);

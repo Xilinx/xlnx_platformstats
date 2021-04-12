@@ -972,7 +972,7 @@ int print_power_utilization(int verbose_flag, char* filename)
 * @note         None.
 *
 ******************************************************************************/
-void print_all_stats(int verbose_flag, char*filename, int interval)
+void print_all_stats(int verbose_flag, char*filename)
 {
 
 	print_cpu_utilization(verbose_flag, filename);

@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 				print_usage();
 				break;
 			case 'a':
-				print_all_stats(verbose_flag,filename,interval);
+				print_all_stats(verbose_flag,filename);
 				break;
 			case 'c':
 				print_cpu_utilization(verbose_flag,filename);
