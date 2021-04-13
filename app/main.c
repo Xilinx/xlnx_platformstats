@@ -31,6 +31,9 @@
 #include <unistd.h>
 #include <platformstats.h>
 
+
+#define SLEEP_MIN_TIME 1
+
 /************************** Variable Definitions *****************************/
 static int verbose_flag=0;
 int interval=1;
@@ -122,24 +125,59 @@ int main(int argc, char *argv[])
 				break;
 			case 'a':
 				print_all_stats(verbose_flag);
+				for(int i=1; i<interval; i++)
+				{
+					sleep(1);
+					print_all_stats(verbose_flag);
+				}
 				break;
 			case 'c':
 				print_cpu_utilization(verbose_flag);
+				for(int i=1; i<interval; i++)
+				{
+					sleep(1);
+					print_cpu_utilization(verbose_flag);
+				}
 				break;
 			case 'r':
 				print_ram_memory_utilization(verbose_flag);
+				for(int i=0; i<interval; i++)
+				{
+					sleep(1);
+					print_ram_memory_utilization(verbose_flag);
+				}
 				break;
 			case 's':
 				print_swap_memory_utilization(verbose_flag);
+				for(int i=1; i<interval; i++)
+				{
+					sleep(1);
+					print_swap_memory_utilization(verbose_flag);
+				}
 				break;
 			case 'p':
 				print_power_utilization(verbose_flag);
+				for(int i=1; i<interval; i++)
+				{
+					sleep(1);
+					print_power_utilization(verbose_flag);
+				}
 				break;
 			case 'm':
 				print_cma_utilization(verbose_flag);
+				for(int i=1; i<interval; i++)
+				{
+					sleep(1);
+					print_cma_utilization(verbose_flag);
+				}
 				break;
 			case 'f':
 				print_cpu_frequency(verbose_flag);
+				for(int i=1; i<interval; i++)
+				{
+					sleep(1);
+					print_cpu_frequency(verbose_flag);
+				}
 				break;
 			default:
 				printf("Incorrect options passed, please see usage");
