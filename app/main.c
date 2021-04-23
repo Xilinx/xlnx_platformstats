@@ -100,10 +100,6 @@ int main(int argc, char *argv[])
 	{
 		/* Parse arguments */
 		opt = getopt_long(argc, argv, "voacrspmfi:l:s:h",long_options, &options_index);
-		if (opt == -1)
-		{
-			break;
-		}
 		switch(opt)
 		{
 			case 'v':
@@ -180,8 +176,7 @@ int main(int argc, char *argv[])
 				}
 				break;
 			default:
-				printf("Incorrect options passed, please see usage");
-				print_usage();
+				print_all_stats(verbose_flag);
 				return(0);
 		}
 	}
