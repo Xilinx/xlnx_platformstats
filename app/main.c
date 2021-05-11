@@ -92,77 +92,74 @@ int main(int argc, char *argv[])
 		{0,0,0,0}
 	};
 
-	while(1)
+	/* Parse arguments */
+	opt = getopt_long(argc, argv, "voacpmfi:l:s:h",long_options, &options_index);
+	switch(opt)
 	{
-		/* Parse arguments */
-		opt = getopt_long(argc, argv, "voacpmfi:l:s:h",long_options, &options_index);
-		switch(opt)
-		{
-			case 'v':
-				verbose_flag = 1;
-				break;
-			case 'i':
-				interval = atoi(optarg);
-				break;
-			case 'l':
-				filename = optarg;
-				if(filename)
-				{
-				        int fd = open(filename,O_CREAT |O_WRONLY | O_APPEND, 0755);
-				        dup2(fd,1);
-				}
-				break;
-			case 'h':
-				print_usage();
-				break;
-			case 'a':
+		case 'v':
+			verbose_flag = 1;
+			break;
+		case 'i':
+			interval = atoi(optarg);
+			break;
+		case 'l':
+			filename = optarg;
+			if(filename)
+			{
+			        int fd = open(filename,O_CREAT |O_WRONLY | O_APPEND, 0755);
+			        dup2(fd,1);
+			}
+			break;
+		case 'h':
+			print_usage();
+			break;
+		case 'a':
+			print_all_stats(verbose_flag);
+			for(int i=1; i<interval; i++)
+			{
+				sleep(1);
 				print_all_stats(verbose_flag);
-				for(int i=1; i<interval; i++)
-				{
-					sleep(1);
-					print_all_stats(verbose_flag);
-				}
-				break;
-			case 'c':
+			}
+			break;
+		case 'c':
+			print_cpu_utilization(verbose_flag);
+			for(int i=1; i<interval; i++)
+			{
+				sleep(1);
 				print_cpu_utilization(verbose_flag);
-				for(int i=1; i<interval; i++)
-				{
-					sleep(1);
-					print_cpu_utilization(verbose_flag);
-				}
-				break;
-			case 'p':
+			}
+			break;
+		case 'p':
+			print_power_utilization(verbose_flag);
+			for(int i=1; i<interval; i++)
+			{
+				sleep(1);
 				print_power_utilization(verbose_flag);
-				for(int i=1; i<interval; i++)
-				{
-					sleep(1);
-					print_power_utilization(verbose_flag);
-				}
-				break;
-			case 'm':
+			}
+			break;
+		case 'm':
+			print_cma_utilization(verbose_flag);
+			print_swap_memory_utilization(verbose_flag);
+			print_ram_memory_utilization(verbose_flag);
+			for(int i=1; i<interval; i++)
+			{
+				sleep(1);
 				print_cma_utilization(verbose_flag);
 				print_swap_memory_utilization(verbose_flag);
 				print_ram_memory_utilization(verbose_flag);
-				for(int i=1; i<interval; i++)
-				{
-					sleep(1);
-					print_cma_utilization(verbose_flag);
-					print_swap_memory_utilization(verbose_flag);
-					print_ram_memory_utilization(verbose_flag);
-				}
-				break;
-			case 'f':
+			}
+			break;
+		case 'f':
+			print_cpu_frequency(verbose_flag);
+			for(int i=1; i<interval; i++)
+			{
+				sleep(1);
 				print_cpu_frequency(verbose_flag);
-				for(int i=1; i<interval; i++)
-				{
-					sleep(1);
-					print_cpu_frequency(verbose_flag);
-				}
-				break;
-			default:
-				print_all_stats(verbose_flag);
-				return(0);
-		}
+			}
+			break;
+		default:
+			print_all_stats(verbose_flag);
+			return(0);
 	}
 	return(0);
 }
