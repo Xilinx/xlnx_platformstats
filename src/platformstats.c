@@ -163,17 +163,27 @@ int print_cpu_utilization(int verbose_flag)
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		st0_0[cpu_id].total_util = 0;
-		st0_1[cpu_id].total_util = 0;
-
 		get_stats(&st0_0[cpu_id],cpu_id);
-		sleep(1);
-		get_stats(&st0_1[cpu_id],cpu_id);
-		st0_1[cpu_id].total_util = calculate_load(&st0_0[cpu_id],&st0_1[cpu_id]);
 
 		if(verbose_flag)
 		{
 			printf("cpu_id=%d\nStats at t0\n",cpu_id);
 			print_cpu_stats(&st0_0[cpu_id],cpu_id);
+		}
+	}
+
+	sleep(1);
+
+	cpu_id = 0;
+
+	for(; cpu_id < num_cpus_conf; cpu_id++)
+	{
+		st0_1[cpu_id].total_util = 0;
+		get_stats(&st0_1[cpu_id],cpu_id);
+		st0_1[cpu_id].total_util = calculate_load(&st0_0[cpu_id],&st0_1[cpu_id]);
+
+		if(verbose_flag)
+		{
 			printf("Stats at t1 after 1s\n");
 			print_cpu_stats(&st0_1[cpu_id],cpu_id);
 		}
