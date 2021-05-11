@@ -1,7 +1,7 @@
 /******************************************************************************
-* Copyright (C) 2019 - 2020 Xilinx, Inc.  All rights reserved.
-* SPDX-License-Identifier: MIT
-******************************************************************************/
+ * Copyright (C) 2019 - 2020 Xilinx, Inc.  All rights reserved.
+ * SPDX-License-Identifier: MIT
+ ******************************************************************************/
 
 /******************************************************************************/
 /***************************** Include Files *********************************/
@@ -19,26 +19,26 @@
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
 /*
-*
-* This API opens /proc/stat file to read information for each CPU and store it in struct
-* /proc/stat displays the following columns of information for any CPU
-* user: time spent on processes executing in user mode with normal priority
-* nice: time spent on processes executing in user mode with "niced" priority
-* system: time spent on processes executing in kernel mode
-* idle: time spent idling (no CPU instructions) while there were no disk I/O requests
-* outstanding.
-* iowait: time spent idling while there were outstanding disk I/O requests.
-* irq: time spent servicing interrupt requests.
-* softirq: time spent servicing softirq.
-*
-* @param	cpu_stat: store CPU stats
-* @param	cpu_id: CPU id for which the details must be caputred.
-*
-* @return	None.
-*
-* @note		Internal API only.
-*
-******************************************************************************/
+ *
+ * This API opens /proc/stat file to read information for each CPU and store it in struct
+ * /proc/stat displays the following columns of information for any CPU
+ * user: time spent on processes executing in user mode with normal priority
+ * nice: time spent on processes executing in user mode with "niced" priority
+ * system: time spent on processes executing in kernel mode
+ * idle: time spent idling (no CPU instructions) while there were no disk I/O requests
+ * outstanding.
+ * iowait: time spent idling while there were outstanding disk I/O requests.
+ * irq: time spent servicing interrupt requests.
+ * softirq: time spent servicing softirq.
+ *
+ * @param	cpu_stat: store CPU stats
+ * @param	cpu_id: CPU id for which the details must be caputred.
+ *
+ * @return	None.
+ *
+ * @note		Internal API only.
+ *
+ ******************************************************************************/
 int get_stats(struct cpustat *cpu_stat, int cpu_id)
 {
 	FILE *fp;
@@ -59,9 +59,9 @@ int get_stats(struct cpustat *cpu_stat, int cpu_id)
 		skip_lines(fp, lskip);
 
 		fscanf(fp,"%s %ld %ld %ld %ld %ld %ld %ld", cpun,
-			&(cpu_stat->user), &(cpu_stat->nice), &(cpu_stat->system),
-			&(cpu_stat->idle), &(cpu_stat->iowait), &(cpu_stat->irq),
-			&(cpu_stat->softirq));
+				&(cpu_stat->user), &(cpu_stat->nice), &(cpu_stat->system),
+				&(cpu_stat->idle), &(cpu_stat->iowait), &(cpu_stat->irq),
+				&(cpu_stat->softirq));
 
 		fclose(fp);
 	}
@@ -71,40 +71,40 @@ int get_stats(struct cpustat *cpu_stat, int cpu_id)
 
 /*****************************************************************************/
 /*
-*
-* This API prints CPU stats stored in given structure for particular CPU id 
-*
-* @param	cpu_stat: struct that stores CPU stats
-* @param	cpu_id: CPU id for which the details must be caputred.
-*
-* @return	None.
-*
-* @note		Internal API only.
-*
-******************************************************************************/
+ *
+ * This API prints CPU stats stored in given structure for particular CPU id 
+ *
+ * @param	cpu_stat: struct that stores CPU stats
+ * @param	cpu_id: CPU id for which the details must be caputred.
+ *
+ * @return	None.
+ *
+ * @note		Internal API only.
+ *
+ ******************************************************************************/
 int print_cpu_stats(struct cpustat *st, int cpu_id)
 {
 	printf("CPU%d: %ld %ld %ld %ld %ld %ld %ld\n", cpu_id, (st->user), (st->nice), 
-        (st->system), (st->idle), (st->iowait), (st->irq),
-        (st->softirq));
-	
+			(st->system), (st->idle), (st->iowait), (st->irq),
+			(st->softirq));
+
 	return(0);
 }
 
 /*****************************************************************************/
 /*
-*
-* This API calculates CPU util in real time, by computing delta at two time instances.
-* By default the interval between two time instances is 1s if not specified. 
-*
-* @param	prev: CPU stats at T0
-* @param	curr: CPU stats at T1
-*
-* @return	cpu_util.
-*
-* @note		Internal API only.
-*
-******************************************************************************/
+ *
+ * This API calculates CPU util in real time, by computing delta at two time instances.
+ * By default the interval between two time instances is 1s if not specified. 
+ *
+ * @param	prev: CPU stats at T0
+ * @param	curr: CPU stats at T1
+ *
+ * @return	cpu_util.
+ *
+ * @note		Internal API only.
+ *
+ ******************************************************************************/
 double calculate_load(struct cpustat *prev, struct cpustat *curr)
 {
 	unsigned long idle_prev, idle_curr, nidle_prev, nidle_curr;
@@ -115,33 +115,33 @@ double calculate_load(struct cpustat *prev, struct cpustat *curr)
 	idle_curr=(curr->idle)+(curr->iowait);
 
 	nidle_prev = (prev->user) + (prev->nice) + (prev->system) + (prev->irq) + (prev->softirq);
-    	nidle_curr = (curr->user) + (curr->nice) + (curr->system) + (curr->irq) + (curr->softirq);
+	nidle_curr = (curr->user) + (curr->nice) + (curr->system) + (curr->irq) + (curr->softirq);
 
-    	total_prev = idle_prev + nidle_prev;
-    	total_curr = idle_curr + nidle_curr;
+	total_prev = idle_prev + nidle_prev;
+	total_curr = idle_curr + nidle_curr;
 
-    	total_delta = (double) total_curr - (double) total_prev;
-    	idle_delta = (double) idle_curr - (double) idle_prev;
+	total_delta = (double) total_curr - (double) total_prev;
+	idle_delta = (double) idle_curr - (double) idle_prev;
 
 	cpu_util = (1000 * (total_delta - idle_delta) / total_delta + 1) / 10;
-	
+
 	return (cpu_util);
 }
 
 /*****************************************************************************/
 /*
-*
-* This API identifies the number of configured CPUs in the system. For each
-* active CPU it reads the CPU stats by calling get_stats and then calculates
-* load.
-*
-* @param	verbose_flag: Enable verbose prints on stdout
-*
-* @return	None.
-*
-* @note		None.
-*
-******************************************************************************/
+ *
+ * This API identifies the number of configured CPUs in the system. For each
+ * active CPU it reads the CPU stats by calling get_stats and then calculates
+ * load.
+ *
+ * @param	verbose_flag: Enable verbose prints on stdout
+ *
+ * @return	None.
+ *
+ * @note		None.
+ *
+ ******************************************************************************/
 int print_cpu_utilization(int verbose_flag)
 {
 	int num_cpus_conf, cpu_id;
@@ -152,7 +152,7 @@ int print_cpu_utilization(int verbose_flag)
 
 	st0_0 = malloc(num_cpus_conf * sizeof (struct cpustat));
 	st0_1 = malloc(num_cpus_conf * sizeof (struct cpustat));
-	
+
 	if(!st0_0 || !st0_1)
 	{
 		printf("Unable to allocate memory, malloc failed");
@@ -166,10 +166,10 @@ int print_cpu_utilization(int verbose_flag)
 		st0_1[cpu_id].total_util = 0;
 
 		get_stats(&st0_0[cpu_id],cpu_id);
-	        sleep(1);
+		sleep(1);
 		get_stats(&st0_1[cpu_id],cpu_id);
 		st0_1[cpu_id].total_util = calculate_load(&st0_0[cpu_id],&st0_1[cpu_id]);
-	
+
 		if(verbose_flag)
 		{
 			printf("cpu_id=%d\nStats at t0\n",cpu_id);
@@ -187,17 +187,17 @@ int print_cpu_utilization(int verbose_flag)
 }
 /*****************************************************************************/
 /*
-*
-* This API identifies the number of configured CPUs in the system. For each
-* active CPU it reads the CPU frequency by opening /proc/cpuinfo.
-*
-* @param	verbose_flag: Enable verbose prints on stdout
-*
-* @return	cpu_freq.
-*
-* @note		Internal API.
-*
-******************************************************************************/
+ *
+ * This API identifies the number of configured CPUs in the system. For each
+ * active CPU it reads the CPU frequency by opening /proc/cpuinfo.
+ *
+ * @param	verbose_flag: Enable verbose prints on stdout
+ *
+ * @return	cpu_freq.
+ *
+ * @note		Internal API.
+ *
+ ******************************************************************************/
 
 int get_cpu_frequency(int cpu_id, float* cpu_freq)
 {
@@ -241,17 +241,17 @@ int get_cpu_frequency(int cpu_id, float* cpu_freq)
 
 /*****************************************************************************/
 /*
-*
-* This API identifies the number of configured CPUs in the system. For each
-* active CPU it reads the CPU frequency by calling get_cpu_freq and prints it.
-*
-* @param	verbose_flag: Enable verbose prints on stdout
-*
-* @return	None.
-*
-* @note		None.
-*
-******************************************************************************/
+ *
+ * This API identifies the number of configured CPUs in the system. For each
+ * active CPU it reads the CPU frequency by calling get_cpu_freq and prints it.
+ *
+ * @param	verbose_flag: Enable verbose prints on stdout
+ *
+ * @return	None.
+ *
+ * @note		None.
+ *
+ ******************************************************************************/
 int print_cpu_frequency(int verbose_flag)
 {
 	int num_cpus_conf, cpu_id;
@@ -272,40 +272,40 @@ int print_cpu_frequency(int verbose_flag)
 
 /*****************************************************************************/
 /*
-*
-* This API scans the following information about physical memory:
-* MemTotal: Total usable physical ram
-* MemFree: The amount of physical ram, in KB, left unused by the system
-* MemAvailable: An estimate on how much memory is available for starting new
-* applications, without swapping.It can be timated from MemFree, Active(file),
-* Inactive(file), and SReclaimable, as well as the "low"
-* watermarks from /proc/zoneinfo.
-*
-* @param        MemTotal: Total usable physical ram size
-* @param        MemFree: amount of RAM left unsused
-* @param        MemAvailable: estimate of amount of memory available to start a new
-* app
-*
-* @return       Error code.
-*
-* @note         Internal API.
-*
-******************************************************************************/
+ *
+ * This API scans the following information about physical memory:
+ * MemTotal: Total usable physical ram
+ * MemFree: The amount of physical ram, in KB, left unused by the system
+ * MemAvailable: An estimate on how much memory is available for starting new
+ * applications, without swapping.It can be timated from MemFree, Active(file),
+ * Inactive(file), and SReclaimable, as well as the "low"
+ * watermarks from /proc/zoneinfo.
+ *
+ * @param        MemTotal: Total usable physical ram size
+ * @param        MemFree: amount of RAM left unsused
+ * @param        MemAvailable: estimate of amount of memory available to start a new
+ * app
+ *
+ * @return       Error code.
+ *
+ * @note         Internal API.
+ *
+ ******************************************************************************/
 int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable)
 {
 	//read first three lines of file
 	//print to terminal
 	FILE *fp;
 
-        fp = fopen("/proc/meminfo", "r");
+	fp = fopen("/proc/meminfo", "r");
 
-        if(fp == NULL)
-        {
-                printf("Unable to open /proc/stat. Returned errono: %d", errno);
-                return(errno);
-        }
-        else
-        {
+	if(fp == NULL)
+	{
+		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		return(errno);
+	}
+	else
+	{
 		char buff[80];
 
 		fscanf(fp," %s %ld",buff,MemTotal);
@@ -325,24 +325,24 @@ int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, 
 
 /*****************************************************************************/
 /*
-*
-* This API prints the following information about physical memory:
-* MemTotal: Total usable physical ram
-* MemFree: The amount of physical ram, in KB, left unused by the system
-* MemAvailable: An estimate on how much memory is available for starting new
-* applications, without swapping.It can be timated from MemFree, Active(file),
-* Inactive(file), and SReclaimable, as well as the "low"
-* watermarks from /proc/zoneinfo.
-*
-* @param        verbose_flag: Enable verbose prints
-* @param        MemAvailable: estimate of amount of memory available to start a new
-* app
-*
-* @return       Error code.
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API prints the following information about physical memory:
+ * MemTotal: Total usable physical ram
+ * MemFree: The amount of physical ram, in KB, left unused by the system
+ * MemAvailable: An estimate on how much memory is available for starting new
+ * applications, without swapping.It can be timated from MemFree, Active(file),
+ * Inactive(file), and SReclaimable, as well as the "low"
+ * watermarks from /proc/zoneinfo.
+ *
+ * @param        verbose_flag: Enable verbose prints
+ * @param        MemAvailable: estimate of amount of memory available to start a new
+ * app
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int print_ram_memory_utilization(int verbose_flag)
 {
 	unsigned long MemTotal=0, MemFree=0, MemAvailable=0;
@@ -363,31 +363,31 @@ int print_ram_memory_utilization(int verbose_flag)
 
 /*****************************************************************************/
 /*
-*
-* This API prints the following information about physical memory:
-* CMATotal: Total CMA information
-* CMAFree: The CMA alloc free information
-*
-* @param        verbose_flag: Enable verbose prints
-*
-* @return       Error code.
-*
-* @note         Internal API.
-*
-******************************************************************************/
+ *
+ * This API prints the following information about physical memory:
+ * CMATotal: Total CMA information
+ * CMAFree: The CMA alloc free information
+ *
+ * @param        verbose_flag: Enable verbose prints
+ *
+ * @return       Error code.
+ *
+ * @note         Internal API.
+ *
+ ******************************************************************************/
 int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree)
 {
 	FILE *fp;
 
-        fp = fopen("/proc/meminfo", "r");
+	fp = fopen("/proc/meminfo", "r");
 
-        if(fp == NULL)
-        {
-                printf("Unable to open /proc/stat. Returned errono: %d", errno);
-                return(errno);
-        }
-        else
-        {
+	if(fp == NULL)
+	{
+		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		return(errno);
+	}
+	else
+	{
 		char buff[80];
 
 		skip_lines(fp,37);
@@ -405,18 +405,18 @@ int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree)
 
 /*****************************************************************************/
 /*
-*
-* This API prints the following information about physical memory:
-* CMATotal: Total CMA information
-* CMAFree: The CMA alloc free information
-*
-* @param        verbose_flag: Enable verbose prints
-*
-* @return       Error code.
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API prints the following information about physical memory:
+ * CMATotal: Total CMA information
+ * CMAFree: The CMA alloc free information
+ *
+ * @param        verbose_flag: Enable verbose prints
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int print_cma_utilization(int verbose_flag)
 {
 	unsigned long CmaTotal=0, CmaFree=0;
@@ -436,33 +436,33 @@ int print_cma_utilization(int verbose_flag)
 
 /*****************************************************************************/
 /*
-*
-* This API scans the following information about physical swap memory:
-* SwapTotal: Total usable physical swap memory
-* SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
-* and is temporarily on the disk.
-*
-* @param        SwapTotal: Total usable physical swap size
-* @param        SwapFree: amount of swap memory free
-*
-* @return       Error code.
-*
-* @note         Internal API.
-*
-******************************************************************************/
+ *
+ * This API scans the following information about physical swap memory:
+ * SwapTotal: Total usable physical swap memory
+ * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
+ * and is temporarily on the disk.
+ *
+ * @param        SwapTotal: Total usable physical swap size
+ * @param        SwapFree: amount of swap memory free
+ *
+ * @return       Error code.
+ *
+ * @note         Internal API.
+ *
+ ******************************************************************************/
 int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFree)
 {
 	FILE *fp;
 
-        fp = fopen("/proc/meminfo", "r");
+	fp = fopen("/proc/meminfo", "r");
 
-        if(fp == NULL)
-        {
-                printf("Unable to open /proc/stat. Returned errono: %d", errno);
-                return(errno);
-        }
-        else
-        {
+	if(fp == NULL)
+	{
+		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		return(errno);
+	}
+	else
+	{
 		char buff[80];
 
 		skip_lines(fp,14);
@@ -480,19 +480,19 @@ int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFre
 
 /*****************************************************************************/
 /*
-*
-* This API prints the following information about swap memory:
-* SwapTotal: Total usable physical swap memory
-* SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
-* and is temporarily on the disk.
-*
-* @param        verbose_flag: Enable verbose prints
-*
-* @return       Error code.
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API prints the following information about swap memory:
+ * SwapTotal: Total usable physical swap memory
+ * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
+ * and is temporarily on the disk.
+ *
+ * @param        verbose_flag: Enable verbose prints
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int print_swap_memory_utilization(int verbose_flag)
 {
 	unsigned long SwapTotal=0, SwapFree=0;
@@ -512,17 +512,17 @@ int print_swap_memory_utilization(int verbose_flag)
 
 /*****************************************************************************/
 /*
-*
-* This API reads the sysfs enteries for a given sysfs file
-*
-* @param	filename: sysfs path
-* @param	value: value read from sysfs entry
-*
-* @return       None
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API reads the sysfs enteries for a given sysfs file
+ *
+ * @param	filename: sysfs path
+ * @param	value: value read from sysfs entry
+ *
+ * @return       None
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int read_sysfs_entry(char* filename, char* value)
 {
 
@@ -544,14 +544,14 @@ int read_sysfs_entry(char* filename, char* value)
 
 /*****************************************************************************/
 /*
-*
-* This API returns the number of hwmon devices registered under /sys/class/hwmon
-*
-* @return       num_hwmon_devices: Number of registered hwmon devices
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API returns the number of hwmon devices registered under /sys/class/hwmon
+ *
+ * @return       num_hwmon_devices: Number of registered hwmon devices
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int count_hwmon_reg_devices()
 {
 	//find number of hwmon devices listed under
@@ -568,31 +568,31 @@ int count_hwmon_reg_devices()
 		return(errno);
 	}
 
-        while((dir = readdir(d)) != NULL)
-        {
+	while((dir = readdir(d)) != NULL)
+	{
 		if(strstr(dir->d_name, "hwmon"))
 		{
 			num_hwmon_devices++;
 		}
-        }
+	}
 
-        closedir(d);
+	closedir(d);
 
 	return(num_hwmon_devices);
 }
 
 /*****************************************************************************/
 /*
-*
-* This API returns hwmon_id of the specified device:
-*
-* @param        name: device name for which hwmon_id needs to be identified
-*
-* @return       hwmon_id
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API returns hwmon_id of the specified device:
+ *
+ * @param        name: device name for which hwmon_id needs to be identified
+ *
+ * @return       hwmon_id
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int get_device_hwmon_id(int verbose_flag, char* name)
 {
 	//find number of hwmon devices listed under
@@ -636,19 +636,19 @@ int get_device_hwmon_id(int verbose_flag, char* name)
 
 /*****************************************************************************/
 /*
-*
-* This API prints the following information about power utilization for ina260:
-* in1_input: Voltage input value.
-* curr1_input: Current input value.
-* power1_input: Instantaneous power use
-*
-* @param        verbose_flag: Enable verbose prints
-*
-* @return       Error code.
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API prints the following information about power utilization for ina260:
+ * in1_input: Voltage input value.
+ * curr1_input: Current input value.
+ * power1_input: Instantaneous power use
+ *
+ * @param        verbose_flag: Enable verbose prints
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int print_ina260_power_info(int verbose_flag)
 {
 	int hwmon_id;
@@ -723,19 +723,19 @@ int print_ina260_power_info(int verbose_flag)
 
 /*****************************************************************************/
 /*
-*
-* This API prints the following information from sysmon driver:
-* in1_input: Voltage input value.
-* curr1_input: Current input value.
-* power1_input: Instantaneous power use
-*
-* @param        verbose_flag: Enable verbose prints
-*
-* @return       Error code.
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API prints the following information from sysmon driver:
+ * in1_input: Voltage input value.
+ * curr1_input: Current input value.
+ * power1_input: Instantaneous power use
+ *
+ * @param        verbose_flag: Enable verbose prints
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int print_sysmon_power_info(int verbose_flag)
 {
 	int hwmon_id;
@@ -925,16 +925,16 @@ int print_sysmon_power_info(int verbose_flag)
 }
 /*****************************************************************************/
 /*
-*
-* This API prints the following information about power utilization for the system:
-*
-* @param        verbose_flag: Enable verbose prints
-*
-* @return       Error code.
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API prints the following information about power utilization for the system:
+ *
+ * @param        verbose_flag: Enable verbose prints
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 int print_power_utilization(int verbose_flag)
 {
 	print_ina260_power_info(verbose_flag);
@@ -945,18 +945,18 @@ int print_power_utilization(int verbose_flag)
 
 /*****************************************************************************/
 /*
-*
-* This API calls all other APIs that read, compute and print different platform
-* stats
-*
-* @param        verbose_flag: Enable verbose prints on stdout
-* and printed
-*
-* @return       None.
-*
-* @note         None.
-*
-******************************************************************************/
+ *
+ * This API calls all other APIs that read, compute and print different platform
+ * stats
+ *
+ * @param        verbose_flag: Enable verbose prints on stdout
+ * and printed
+ *
+ * @return       None.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
 void print_all_stats(int verbose_flag)
 {
 

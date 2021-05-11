@@ -1,17 +1,17 @@
 /******************************************************************************
-* Copyright (C) 2019 - 2020 Xilinx, Inc.  All rights reserved.
-* SPDX-License-Identifier: MIT
-******************************************************************************/
+ * Copyright (C) 2019 - 2020 Xilinx, Inc.  All rights reserved.
+ * SPDX-License-Identifier: MIT
+ ******************************************************************************/
 
 struct cpustat {
-        unsigned long user;
-        unsigned long nice;
-        unsigned long system;
-        unsigned long idle;
-        unsigned long iowait;
-        unsigned long irq;
-        unsigned long softirq;
-        double total_util;
+	unsigned long user;
+	unsigned long nice;
+	unsigned long system;
+	unsigned long idle;
+	unsigned long iowait;
+	unsigned long irq;
+	unsigned long softirq;
+	double total_util;
 };
 
 /************************** Function Prototypes  *****************************/
