@@ -1,0 +1,7 @@
+1. Generate test cases for each API
+2. Contribution guidelines
+	a. Running static analysis checker - cppcheck
+        b. Running test suite
+        c. Patch submission guidelines
+3. Generate docxygen reports
+
