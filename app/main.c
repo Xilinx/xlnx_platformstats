@@ -65,10 +65,8 @@ static void print_usage()
 	printf(" List of stats to print\n");
 	printf("	-a --all		Print all supported stats.\n");
 	printf("	-c --cpu-util		Print CPU Utilization.\n");
-	printf("	-r --ram-util		Print RAM Utilization.\n");
-	printf("	-s --swap-util		Print Swap Mem Utilization.\n");
 	printf("	-p --power-util		Print Power Utilization.\n");
-	printf("	-m --cma-util		Print CMA Mem Utilization.\n");
+	printf("	-m --mem-util		Print all Mem Utilization.\n");
 	printf("	-f --cpu-freq		Print CPU frequency.\n");
 
 }
@@ -88,10 +86,8 @@ int main(int argc, char *argv[])
 		{"stop", required_argument, 0, 's'},
 		{"help", no_argument, 0, 'h'},
 		{"cpu-util", no_argument, 0, 'c'},
-		{"ram-util", no_argument, 0, 'r'},
-		{"swap-util", no_argument, 0, 's'},
 		{"power-util", no_argument, 0, 'p'},
-		{"cma-util", no_argument, 0, 'm'},
+		{"mem-util", no_argument, 0, 'm'},
 		{"cpu-freq", no_argument, 0, 'f'},
 		{0,0,0,0}
 	};
@@ -99,7 +95,7 @@ int main(int argc, char *argv[])
 	while(1)
 	{
 		/* Parse arguments */
-		opt = getopt_long(argc, argv, "voacrspmfi:l:s:h",long_options, &options_index);
+		opt = getopt_long(argc, argv, "voacpmfi:l:s:h",long_options, &options_index);
 		switch(opt)
 		{
 			case 'v':
@@ -135,22 +131,6 @@ int main(int argc, char *argv[])
 					print_cpu_utilization(verbose_flag);
 				}
 				break;
-			case 'r':
-				print_ram_memory_utilization(verbose_flag);
-				for(int i=0; i<interval; i++)
-				{
-					sleep(1);
-					print_ram_memory_utilization(verbose_flag);
-				}
-				break;
-			case 's':
-				print_swap_memory_utilization(verbose_flag);
-				for(int i=1; i<interval; i++)
-				{
-					sleep(1);
-					print_swap_memory_utilization(verbose_flag);
-				}
-				break;
 			case 'p':
 				print_power_utilization(verbose_flag);
 				for(int i=1; i<interval; i++)
@@ -161,10 +141,14 @@ int main(int argc, char *argv[])
 				break;
 			case 'm':
 				print_cma_utilization(verbose_flag);
+				print_swap_memory_utilization(verbose_flag);
+				print_ram_memory_utilization(verbose_flag);
 				for(int i=1; i<interval; i++)
 				{
 					sleep(1);
 					print_cma_utilization(verbose_flag);
+					print_swap_memory_utilization(verbose_flag);
+					print_ram_memory_utilization(verbose_flag);
 				}
 				break;
 			case 'f':
