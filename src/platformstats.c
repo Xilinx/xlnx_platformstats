@@ -400,7 +400,7 @@ int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree)
 	{
 		char buff[80];
 
-		skip_lines(fp,37);
+		skip_lines(fp,41);
 		fscanf(fp," %s %ld",buff,CmaTotal);
 
 		skip_lines(fp,1);
