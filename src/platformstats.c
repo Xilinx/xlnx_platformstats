@@ -498,7 +498,7 @@ int print_swap_memory_utilization(int verbose_flag)
 
 	mem_util_ret = get_swap_memory_utilization(&SwapTotal, &SwapFree);
 
-	printf("\nSwap Mem Utilization\n");
+	printf("Swap Mem Utilization\n");
 	printf("SwapTotal    :    %ld kB\n",SwapTotal);
 	printf("SwapFree     :    %ld kB\n\n",SwapFree);
 
@@ -657,7 +657,7 @@ int print_ina260_power_info(int verbose_flag)
 
 	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260_u14");
 
-	printf("\nPower Utilization\n");
+	printf("Power Utilization\n");
 	if(hwmon_id == -1)
 	{
 		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
@@ -682,8 +682,6 @@ int print_ina260_power_info(int verbose_flag)
 	fscanf(fp,"%ld",&total_power);
 	fclose(fp);
 
-	printf("SOM total power    :     %ld mW\n",(total_power)/1000);
-
 	//if "curr" file exists then read curr value
 	strcpy(filename,base_filepath);
 	strcat(filename,"/curr1_input");
@@ -696,7 +694,6 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_current);
 	fclose(fp);
-	printf("SOM total current    :     %ld mA\n",total_current);
 
 
 	//if "voltage" file exists then read voltage value
@@ -711,7 +708,10 @@ int print_ina260_power_info(int verbose_flag)
 
 	fscanf(fp,"%ld",&total_voltage);
 	fclose(fp);
-	printf("SOM total voltage\t:     %ld mV\n",total_voltage);
+
+	printf("SOM total power    :     %ld mW\n",(total_power)/1000);
+	printf("SOM total current  :     %ld mA\n",total_current);
+	printf("SOM total voltage  :     %ld mV\n\n",total_voltage);
 
 
 	return(0);
@@ -908,7 +908,7 @@ int print_sysmon_power_info(int verbose_flag)
 
 	printf("PS Sysmon\n");
 	printf("LPD temperature measurement 		    		:     %ld C\n",(LPD_TEMP)/1000);
-	printf("FPD temperature measurement (REMOTE)  		    		:     %ld C\n",(FPD_TEMP)/1000);
+	printf("FPD temperature measurement (REMOTE)  		    	:     %ld C\n",(FPD_TEMP)/1000);
 	printf("VCC PS FPD voltage measurement (supply 2)   		:     %ld mV\n",VCC_PS_FPD);
 	printf("PS IO Bank 500 voltage measurement (supply 6)		:     %ld mV\n",PS_IO_BANK_500);
 	printf("VCC PS GTR voltage   					:     %ld mV\n",VCC_PS_GTR);
