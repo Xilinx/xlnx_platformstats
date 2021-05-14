@@ -199,7 +199,8 @@ int print_cpu_utilization(int verbose_flag)
 /*
  *
  * This API identifies the number of configured CPUs in the system. For each
- * active CPU it reads the CPU frequency by opening /proc/cpuinfo.
+ * active CPU it reads the CPU frequency by opening
+ * /sys/devices/system/cpu/<cpuid>/cpufreq/cpuinfo_cur_freq.
  *
  * @param	verbose_flag: Enable verbose prints on stdout
  *
@@ -212,40 +213,25 @@ int print_cpu_utilization(int verbose_flag)
 int get_cpu_frequency(int cpu_id, float* cpu_freq)
 {
 	FILE *fp;
+	char base_filepath[] = "/sys/devices/system/cpu/cpu";
+	char cpu_id_str[50];
+	char *filename;
 
-	fp = fopen("/proc/cpuinfo", "r");
-	size_t bytes_read;
+	filename = malloc(255);
 
+	sprintf(cpu_id_str,"%d",cpu_id);
+	strcpy(filename,base_filepath);
+	strcat(filename,cpu_id_str);
+	strcat(filename,"/cpufreq/cpuinfo_cur_freq");
+
+	fp = fopen(filename, "r");
 	if(fp == NULL)
 	{
-		printf("Unable to open /proc/stat. Returned errono: %d", errno);
-		return(errno);
-	}
-	else
-	{
-		skip_lines(fp,(cpu_id*27));
-		char buff[500];
-		char *match;
-
-		bytes_read=fread(buff,sizeof(char),500,fp);
-		fclose(fp);
-
-		if(bytes_read == 0)
-		{
-			return(0);
-		}
-
-		match = strstr(buff,"cpu MHz");
-		buff[bytes_read]='\0';
-		if(match == NULL)
-		{
-			printf("match not found");
-			return(0);
-		}
-
-		sscanf(match,"cpu MHz : %f", cpu_freq);
+		printf("unable to open %s\n",filename);
 	}
 
+	fscanf(fp,"%f",cpu_freq);
+	fclose(fp);
 	return(0);
 }
 
@@ -265,7 +251,7 @@ int get_cpu_frequency(int cpu_id, float* cpu_freq)
 int print_cpu_frequency(int verbose_flag)
 {
 	int num_cpus_conf, cpu_id;
-	float cpu_freq;
+	float cpu_freq = 0;
 
 	num_cpus_conf= get_nprocs_conf();
 	cpu_id=0;
@@ -274,7 +260,7 @@ int print_cpu_frequency(int verbose_flag)
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		get_cpu_frequency(cpu_id,&cpu_freq);
-		printf("CPU%d\t:    %f MHz\n",cpu_id,cpu_freq);
+		printf("CPU%d\t:    %f MHz\n",cpu_id,(cpu_freq)/1000000);
 	}
 
 	return(0);
