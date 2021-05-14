@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	};
 
 	/* Parse arguments */
-	opt = getopt_long(argc, argv, "voacpmf:l:s:h",long_options, &options_index);
+	opt = getopt_long(argc, argv, "voacpmfl:s:h",long_options, &options_index);
 	switch(opt)
 	{
 		case 'v':
