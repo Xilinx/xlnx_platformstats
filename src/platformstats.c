@@ -159,7 +159,7 @@ int print_cpu_utilization(int verbose_flag)
 		return(errno);
 	}
 
-	printf("\nCPU Utilization\n");
+	printf("CPU Utilization\n");
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		st0_0[cpu_id].total_util = 0;
@@ -190,6 +190,7 @@ int print_cpu_utilization(int verbose_flag)
 		printf("CPU%d\t:     %lf%%\n",cpu_id,st0_1[cpu_id].total_util);
 	}
 
+	printf("\n");
 	free(st0_0);
 	free(st0_1);
 
@@ -227,7 +228,13 @@ int get_cpu_frequency(int cpu_id, float* cpu_freq)
 	fp = fopen(filename, "r");
 	if(fp == NULL)
 	{
-		printf("unable to open %s\n",filename);
+		printf(" File open returned with error : %s\n", strerror(errno));
+		if(errno == 13)
+		{
+			printf("This command has to be run under the root user \n");
+		}
+		exit(0);
+
 	}
 
 	fscanf(fp,"%f",cpu_freq);
@@ -256,12 +263,13 @@ int print_cpu_frequency(int verbose_flag)
 	num_cpus_conf= get_nprocs_conf();
 	cpu_id=0;
 
-	printf("\nCPU Frequency\n");
+	printf("CPU Frequency\n");
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		get_cpu_frequency(cpu_id,&cpu_freq);
-		printf("CPU%d\t:    %f MHz\n",cpu_id,(cpu_freq)/1000000);
+		printf("CPU%d\t:    %f MHz\n",cpu_id,(cpu_freq)/1000);
 	}
+	printf("\n");
 
 	return(0);
 }
@@ -348,7 +356,7 @@ int print_ram_memory_utilization(int verbose_flag)
 
 	mem_util_ret = get_ram_memory_utilization(&MemTotal, &MemFree, &MemAvailable);
 
-	printf("\nRAM Utilization\n");
+	printf("RAM Utilization\n");
 	printf("MemTotal      :     %ld kB\n",MemTotal);
 	printf("MemFree	      :     %ld kB\n", MemFree);
 	printf("MemAvailable  :     %ld kB\n\n", MemAvailable);
@@ -422,9 +430,9 @@ int print_cma_utilization(int verbose_flag)
 
 	cma_util_ret = get_cma_utilization(&CmaTotal, &CmaFree);
 
-	printf("\nCMA Mem Utilization\n");
+	printf("CMA Mem Utilization\n");
 	printf("CmaTotal   :     %ld kB\n",CmaTotal);
-	printf("CmaFree    :     %ld kB\n", CmaFree);
+	printf("CmaFree    :     %ld kB\n\n", CmaFree);
 
 	return(cma_util_ret);
 
@@ -915,7 +923,7 @@ int print_sysmon_power_info(int verbose_flag)
 	printf("VTT PS GTR voltage    					:     %ld mV\n\n",VTT_PS_GTR);
 
 	printf("PL Sysmon\n");
-	printf("PL temperature    					:     %ld C\n",(PL_TEMP)/1000);
+	printf("PL temperature    					:     %ld C\n\n",(PL_TEMP)/1000);
 
 	return(0);
 }
