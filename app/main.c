@@ -56,9 +56,6 @@ static void print_usage()
 	printf(" XILINX PLATFORM STATS UTILITY \n");
 	printf(" Usage: platformstats [options] [stats]\n\n");
 	printf(" Options \n");
-	printf(" 	-v --verbose		Print verbose messages  \n");
-	printf(" 	-l --logfile		Print output to logfile  \n");
-	printf(" 	-s --stop   		Stop any running instances of platformstats  \n");
 	printf("	-h --help		Show this usuage.\n\n");
 	printf(" List of stats to print\n");
 	printf("	-a --all		Print all supported stats.\n");
@@ -75,12 +72,9 @@ int main(int argc, char *argv[])
 	static struct option long_options[] =
 	{
 		/* These options set a flag; */
-		{"verbose", no_argument, &verbose_flag, 1},
 		{"brief", no_argument, &verbose_flag, 0},
 		{"all", no_argument, 0, 'a'},
 		/* These options dont set a flag; */
-		{"logfile", required_argument, 0, 'l'},
-		{"stop", required_argument, 0, 's'},
 		{"help", no_argument, 0, 'h'},
 		{"cpu-util", no_argument, 0, 'c'},
 		{"power-util", no_argument, 0, 'p'},
