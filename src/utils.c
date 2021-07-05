@@ -6,6 +6,9 @@
 /******************************************************************************/
 /***************************** Include Files *********************************/
 #include <stdio.h>
+#include <string.h>
+
+#define MAX_STR_ID_LEN 50
 
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
@@ -35,4 +38,12 @@ void skip_lines(FILE *fp, int numlines)
 	}
 }
 
+//Function to compute sysfys file entry and return the final file to read from
+void get_sys_abs_path(char *filename, int id, char *filepath)
+{
+	char str_id[MAX_STR_ID_LEN];
 
+	sprintf(str_id,"%d",id);
+	strcat(filename,str_id);
+	strcat(filename,filepath);
+}

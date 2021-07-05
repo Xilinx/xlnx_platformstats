@@ -16,6 +16,8 @@
 #include "platformstats.h"
 #include "utils.h"
 
+#define MAX_FILENAME_LEN 500
+
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
 /*
@@ -214,16 +216,12 @@ int print_cpu_utilization(int verbose_flag)
 int get_cpu_frequency(int cpu_id, float* cpu_freq)
 {
 	FILE *fp;
-	char base_filepath[] = "/sys/devices/system/cpu/cpu";
-	char cpu_id_str[50];
-	char *filename;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/devices/system/cpu/cpu";
+	char filename[MAX_FILENAME_LEN];
 
-	filename = malloc(255);
+	strcpy(filename,base_filename);
 
-	sprintf(cpu_id_str,"%d",cpu_id);
-	strcpy(filename,base_filepath);
-	strcat(filename,cpu_id_str);
-	strcat(filename,"/cpufreq/cpuinfo_cur_freq");
+	get_sys_abs_path(filename, cpu_id, "/cpufreq/cpuinfo_cur_freq");
 
 	fp = fopen(filename, "r");
 	if(fp == NULL)
@@ -601,12 +599,9 @@ int get_device_hwmon_id(int verbose_flag, char* name)
 {
 	//find number of hwmon devices listed under
 	int num_hwmon_devices,hwmon_id;
-	char hwmon_id_str[50];
-	char *device_name;
-	char *filename;
-
-	filename = malloc(255);
-	device_name = malloc(255);
+	char base_filename[MAX_FILENAME_LEN]="/sys/class/hwmon/hwmon";
+	char filename[MAX_FILENAME_LEN];
+	char device_name[MAX_FILENAME_LEN];
 
 	hwmon_id=-1;
 
@@ -614,10 +609,9 @@ int get_device_hwmon_id(int verbose_flag, char* name)
 
 	for(hwmon_id = 0; hwmon_id < num_hwmon_devices; hwmon_id++)
 	{
-		sprintf(hwmon_id_str,"%d",hwmon_id);
-		strcpy(filename,"/sys/class/hwmon/hwmon");
-		strcat(filename,hwmon_id_str);
-		strcat(filename,"/name");
+		strcpy(filename,base_filename);
+
+		get_sys_abs_path(filename,hwmon_id,"/name");
 
 		read_sysfs_entry(filename,device_name);
 
@@ -633,8 +627,6 @@ int get_device_hwmon_id(int verbose_flag, char* name)
 		}
 	}
 
-	free(filename);
-	free(device_name);
 	return(-1);
 }
 
@@ -658,10 +650,8 @@ int print_ina260_power_info(int verbose_flag)
 	int hwmon_id;
 	long total_power, total_current, total_voltage;
 	FILE *fp;
-	char filename[255];
-	char hwmon_id_str[255];
-
-	char base_filepath[] = "/sys/class/hwmon/hwmon";
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+	char filename[MAX_FILENAME_LEN];
 
 	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260_u14");
 
@@ -672,14 +662,8 @@ int print_ina260_power_info(int verbose_flag)
 		return(0);
 	}
 
-	//printf("hwmon device found, device_id is %d\n",hwmon_id);
-
-	sprintf(hwmon_id_str,"%d",hwmon_id);
-	strcat(base_filepath,hwmon_id_str);
-
-	//if "power" file exists then read power value
-	strcpy(filename,base_filepath);
-	strcat(filename,"/power1_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename,hwmon_id,"/power1_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -690,9 +674,8 @@ int print_ina260_power_info(int verbose_flag)
 	fscanf(fp,"%ld",&total_power);
 	fclose(fp);
 
-	//if "curr" file exists then read curr value
-	strcpy(filename,base_filepath);
-	strcat(filename,"/curr1_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename,hwmon_id,"/curr1_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -703,10 +686,9 @@ int print_ina260_power_info(int verbose_flag)
 	fscanf(fp,"%ld",&total_current);
 	fclose(fp);
 
-
 	//if "voltage" file exists then read voltage value
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in1_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename,hwmon_id,"/in1_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -744,13 +726,12 @@ int print_sysmon_power_info(int verbose_flag)
 {
 	int hwmon_id;
 	FILE *fp;
-	char filename[255];
-	char hwmon_id_str[255];
 	long LPD_TEMP, FPD_TEMP, PL_TEMP;
 	long VCC_PSPLL, PL_VCCINT, VOLT_DDRS, VCC_PSINTFP, VCC_PS_FPD;
 	long PS_IO_BANK_500, VCC_PS_GTR, VTT_PS_GTR;
 
-	char base_filepath[] = "/sys/class/hwmon/hwmon";
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+	char filename[MAX_FILENAME_LEN];
 
 	hwmon_id = get_device_hwmon_id(verbose_flag,"ams");
 
@@ -761,13 +742,9 @@ int print_sysmon_power_info(int verbose_flag)
 	}
 
 	//printf("hwmon device found, device_id is %d \n",hwmon_id);
+	strcpy(filename,base_filename);
 
-	sprintf(hwmon_id_str,"%d",hwmon_id);
-	strcat(base_filepath,hwmon_id_str);
-
-	//Print temperature values
-	strcpy(filename,base_filepath);
-	strcat(filename,"/temp1_input");
+	get_sys_abs_path(filename, hwmon_id, "/temp1_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -779,8 +756,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//FPD temp
-	strcpy(filename,base_filepath);
-	strcat(filename,"/temp2_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "/temp2_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -792,8 +769,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//PL temp
-	strcpy(filename,base_filepath);
-	strcat(filename,"/temp3_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "/temp3_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -805,8 +782,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//VCC_PSPLL
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in1_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "/in1_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -818,8 +795,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//PL_VCCINT
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in3_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "/in3_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -831,8 +808,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//VOLT_DDRS
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in6_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "in6_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -844,8 +821,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//VCC_PSINTFP
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in7_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "in7_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -857,8 +834,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//VCC_PS_FPD
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in9_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "in9_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -870,8 +847,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	// PS_IO_BANK_500
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in13_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "in13_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -883,8 +860,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//VCC_PS_GTR
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in16_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "in16_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
@@ -896,8 +873,8 @@ int print_sysmon_power_info(int verbose_flag)
 	fclose(fp);
 
 	//VTT_PS_GTR
-	strcpy(filename,base_filepath);
-	strcat(filename,"/in17_input");
+	strcpy(filename,base_filename);
+	get_sys_abs_path(filename, hwmon_id, "in17_input");
 
 	fp = fopen(filename,"r");
 	if(fp == NULL)
