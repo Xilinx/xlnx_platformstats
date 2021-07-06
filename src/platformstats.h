@@ -31,7 +31,6 @@ int print_power_utilization(int verbose_flag);
 int print_ina260_power_info(int verbose_flag);
 int count_hwmon_reg_devices();
 int get_device_hwmon_id(int verbose_flag, char* name);
-int read_sysfs_entry(char* filename, char* entry);
 
 int print_cma_utilization(int verbose_flag);
 int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree);

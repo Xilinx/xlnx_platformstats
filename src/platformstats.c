@@ -198,6 +198,110 @@ int print_cpu_utilization(int verbose_flag)
 
 	return(0);
 }
+
+/*****************************************************************************/
+/*
+ *
+ * This API reads the sysfs enteries for a given sysfs file
+ *
+ * @param	filename: sysfs path
+ * @param	value: value read from sysfs entry
+ *
+ * @return       None
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+static void read_int_sysfs_entry(char* base_filename, char* filepath, int id, long *val)
+{
+	FILE *fp;
+	char filename[MAX_FILENAME_LEN];
+
+	strcpy(filename,base_filename);
+
+	get_sys_abs_path(filename, id, filepath);
+
+	fp = fopen(filename, "r");
+	if(fp == NULL)
+	{
+		printf(" File open returned with error : %s\n", strerror(errno));
+	}
+
+	fscanf(fp,"%ld",val);
+	fclose(fp);
+
+}
+/*****************************************************************************/
+/*
+ *
+ * This API reads the sysfs enteries for a given sysfs file
+ *
+ * @param	filename: sysfs path
+ * @param	value: value read from sysfs entry
+ *
+ * @return       None
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+static void read_float_sysfs_entry(char* base_filename, char* filepath, int id, float *val)
+{
+	FILE *fp;
+	char filename[MAX_FILENAME_LEN];
+
+	strcpy(filename,base_filename);
+
+	get_sys_abs_path(filename, id, filepath);
+
+	fp = fopen(filename, "r");
+	if(fp == NULL)
+	{
+		printf(" File open returned with error : %s\n", strerror(errno));
+	}
+
+	fscanf(fp,"%f",val);
+	fclose(fp);
+
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API reads the sysfs enteries for a given sysfs file
+ *
+ * @param	filename: sysfs path
+ * @param	value: value read from sysfs entry
+ *
+ * @return       None
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+static int read_char_sysfs_entry(char* base_filename, char* filepath, int id, char* value)
+{
+
+	FILE *fp;
+	char filename[MAX_FILENAME_LEN];
+
+	strcpy(filename,base_filename);
+
+	get_sys_abs_path(filename, id, filepath);
+
+	fp = fopen(filename,"r");
+
+	if(fp == NULL)
+	{
+		printf("Unable to open %s\n",filename);
+		return(errno);
+	}
+
+	fscanf(fp,"%s",value);
+	fclose(fp);
+
+	return(0);
+
+}
+
 /*****************************************************************************/
 /*
  *
@@ -215,28 +319,11 @@ int print_cpu_utilization(int verbose_flag)
 
 int get_cpu_frequency(int cpu_id, float* cpu_freq)
 {
-	FILE *fp;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/devices/system/cpu/cpu";
-	char filename[MAX_FILENAME_LEN];
+	char filepath[MAX_FILENAME_LEN] = "/cpufreq/cpuinfo_cur_freq";
 
-	strcpy(filename,base_filename);
+	read_float_sysfs_entry(base_filename,filepath,cpu_id,cpu_freq);
 
-	get_sys_abs_path(filename, cpu_id, "/cpufreq/cpuinfo_cur_freq");
-
-	fp = fopen(filename, "r");
-	if(fp == NULL)
-	{
-		printf(" File open returned with error : %s\n", strerror(errno));
-		if(errno == 13)
-		{
-			printf("This command has to be run under the root user \n");
-		}
-		exit(0);
-
-	}
-
-	fscanf(fp,"%f",cpu_freq);
-	fclose(fp);
 	return(0);
 }
 
@@ -515,38 +602,6 @@ int print_swap_memory_utilization(int verbose_flag)
 /*****************************************************************************/
 /*
  *
- * This API reads the sysfs enteries for a given sysfs file
- *
- * @param	filename: sysfs path
- * @param	value: value read from sysfs entry
- *
- * @return       None
- *
- * @note         None.
- *
- ******************************************************************************/
-int read_sysfs_entry(char* filename, char* value)
-{
-
-	FILE *fp;
-
-	fp = fopen(filename,"r");
-
-	if(fp == NULL)
-	{
-		printf("Unable to open %s\n",filename);
-		return(errno);
-	}
-
-	fscanf(fp,"%s",value);
-
-	return(0);
-
-}
-
-/*****************************************************************************/
-/*
- *
  * This API returns the number of hwmon devices registered under /sys/class/hwmon
  *
  * @return       num_hwmon_devices: Number of registered hwmon devices
@@ -609,11 +664,7 @@ int get_device_hwmon_id(int verbose_flag, char* name)
 
 	for(hwmon_id = 0; hwmon_id < num_hwmon_devices; hwmon_id++)
 	{
-		strcpy(filename,base_filename);
-
-		get_sys_abs_path(filename,hwmon_id,"/name");
-
-		read_sysfs_entry(filename,device_name);
+		read_char_sysfs_entry(base_filename,"/name", hwmon_id, device_name);
 
 		if(!strcmp(name,device_name))
 		{
@@ -649,9 +700,7 @@ int print_ina260_power_info(int verbose_flag)
 {
 	int hwmon_id;
 	long total_power, total_current, total_voltage;
-	FILE *fp;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
-	char filename[MAX_FILENAME_LEN];
 
 	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260_u14");
 
@@ -662,42 +711,9 @@ int print_ina260_power_info(int verbose_flag)
 		return(0);
 	}
 
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename,hwmon_id,"/power1_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&total_power);
-	fclose(fp);
-
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename,hwmon_id,"/curr1_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&total_current);
-	fclose(fp);
-
-	//if "voltage" file exists then read voltage value
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename,hwmon_id,"/in1_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&total_voltage);
-	fclose(fp);
+	read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, &total_power);
+	read_int_sysfs_entry(base_filename,"/curr1_input", hwmon_id, &total_current);
+	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, &total_voltage);
 
 	printf("SOM total power    :     %ld mW\n",(total_power)/1000);
 	printf("SOM total current  :     %ld mA\n",total_current);
@@ -725,13 +741,11 @@ int print_ina260_power_info(int verbose_flag)
 int print_sysmon_power_info(int verbose_flag)
 {
 	int hwmon_id;
-	FILE *fp;
 	long LPD_TEMP, FPD_TEMP, PL_TEMP;
 	long VCC_PSPLL, PL_VCCINT, VOLT_DDRS, VCC_PSINTFP, VCC_PS_FPD;
 	long PS_IO_BANK_500, VCC_PS_GTR, VTT_PS_GTR;
 
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
-	char filename[MAX_FILENAME_LEN];
 
 	hwmon_id = get_device_hwmon_id(verbose_flag,"ams");
 
@@ -742,148 +756,17 @@ int print_sysmon_power_info(int verbose_flag)
 	}
 
 	//printf("hwmon device found, device_id is %d \n",hwmon_id);
-	strcpy(filename,base_filename);
-
-	get_sys_abs_path(filename, hwmon_id, "/temp1_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&LPD_TEMP);
-	fclose(fp);
-
-	//FPD temp
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "/temp2_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&FPD_TEMP);
-	fclose(fp);
-
-	//PL temp
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "/temp3_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&PL_TEMP);
-	fclose(fp);
-
-	//VCC_PSPLL
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "/in1_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&VCC_PSPLL);
-	fclose(fp);
-
-	//PL_VCCINT
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "/in3_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&PL_VCCINT);
-	fclose(fp);
-
-	//VOLT_DDRS
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "in6_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&VOLT_DDRS);
-	fclose(fp);
-
-	//VCC_PSINTFP
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "in7_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&VCC_PSINTFP);
-	fclose(fp);
-
-	//VCC_PS_FPD
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "in9_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&VCC_PS_FPD);
-	fclose(fp);
-
-	// PS_IO_BANK_500
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "in13_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&PS_IO_BANK_500);
-	fclose(fp);
-
-	//VCC_PS_GTR
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "in16_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&VCC_PS_GTR);
-	fclose(fp);
-
-	//VTT_PS_GTR
-	strcpy(filename,base_filename);
-	get_sys_abs_path(filename, hwmon_id, "in17_input");
-
-	fp = fopen(filename,"r");
-	if(fp == NULL)
-	{
-		printf("unable to open %s\n",filename);
-	}
-
-	fscanf(fp,"%ld",&VTT_PS_GTR);
-	fclose(fp);
+	read_int_sysfs_entry(base_filename,"/temp1_input", hwmon_id, &LPD_TEMP);
+	read_int_sysfs_entry(base_filename,"/temp2_input", hwmon_id, &FPD_TEMP);
+	read_int_sysfs_entry(base_filename,"/temp3_input", hwmon_id, &PL_TEMP);
+	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, &VCC_PSPLL);
+	read_int_sysfs_entry(base_filename,"/in3_input", hwmon_id, &PL_VCCINT);
+	read_int_sysfs_entry(base_filename,"/in6_input", hwmon_id, &VOLT_DDRS);
+	read_int_sysfs_entry(base_filename,"/in7_input", hwmon_id, &VCC_PSINTFP);
+	read_int_sysfs_entry(base_filename,"/in9_input", hwmon_id, &VCC_PS_FPD);
+	read_int_sysfs_entry(base_filename,"/in13_input", hwmon_id, &PS_IO_BANK_500);
+	read_int_sysfs_entry(base_filename,"/in16_input", hwmon_id, &VCC_PS_GTR);
+	read_int_sysfs_entry(base_filename,"/in17_input", hwmon_id, &VTT_PS_GTR);
 
 	printf("AMS CTRL\n");
 	printf("System PLLs voltage measurement, VCC_PSLL   		:     %ld mV\n",VCC_PSPLL);
