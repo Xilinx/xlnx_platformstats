@@ -41,6 +41,10 @@ Usage: platformstats [options] [stats]
 ### Compile library
 	cd src/
 	make
+### Compile python bindings
+	./scripts/build.sh
+	cd python-bindings
+	make
 ### Generate Documentation
 	doxygen docs/platformstats_doxygen_config
 HTML docs are populated in tmp/html

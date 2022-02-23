@@ -32,3 +32,5 @@ make clean
 make
 cp platformstats ../
 
+cp platformstats ../python-bindings/
+
