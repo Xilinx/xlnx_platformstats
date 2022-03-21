@@ -696,11 +696,25 @@ int get_device_hwmon_id(int verbose_flag, char* name)
  * @note         None.
  *
  ******************************************************************************/
-int print_ina260_power_info(int verbose_flag)
+int print_ina260_power_info(int verbose_flag, int rate, int duration)
 {
 	int hwmon_id;
 	long total_power, total_current, total_voltage;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	int pos = 0;
+	int len = pos+1;
+	long* powerarr = (long*)calloc(duration,sizeof(long));
+	long power_avg = 0;
+	long power_sum = 0;
+
+	long *currarr = (long*)calloc(duration,sizeof(long));
+	long curr_avg = 0;
+	long curr_sum = 0;
+
+	long *volarr = (long*)calloc(duration,sizeof(long));
+	long vol_avg = 0;
+	long vol_sum = 0;
 
 	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260_u14");
 
@@ -711,14 +725,36 @@ int print_ina260_power_info(int verbose_flag)
 		return(0);
 	}
 
-	read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, &total_power);
-	read_int_sysfs_entry(base_filename,"/curr1_input", hwmon_id, &total_current);
-	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, &total_voltage);
+	for(int i = 0; i < duration; i++ )
+	{
+		read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, &total_power);
+		power_avg = movingAvg(powerarr, &power_sum, pos, len, (total_power)/1000);
+		printf("SOM total power    :     %ld mW\t SOM avg power    :    %ld mW\n",(total_power)/1000, power_avg);
 
-	printf("SOM total power    :     %ld mW\n",(total_power)/1000);
-	printf("SOM total current  :     %ld mA\n",total_current);
-	printf("SOM total voltage  :     %ld mV\n\n",total_voltage);
+		read_int_sysfs_entry(base_filename,"/curr1_input", hwmon_id, &total_current);
+		curr_avg =  movingAvg(currarr, &curr_sum, pos, len, total_current);
+		printf("SOM total current  :     %ld mA\t\t SOM avg current  :    %ld mA\n",total_current, curr_avg);
 
+		read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, &total_voltage);
+		vol_avg =  movingAvg(volarr, &vol_sum, pos, len, total_voltage);
+		printf("SOM total voltage  :     %ld mV\t SOM avg voltage  :   %ld mV\n\n",total_voltage,vol_avg);
+
+		pos++;
+		if(pos >= duration){
+			pos = 0;
+		}
+
+		len++;
+		if(len > duration){
+			len=duration;
+		}
+
+		sleep(rate);
+	}
+
+	free(powerarr);
+	free(currarr);
+	free(volarr);
 
 	return(0);
 }
@@ -799,9 +835,9 @@ int print_sysmon_power_info(int verbose_flag)
  * @note         None.
  *
  ******************************************************************************/
-int print_power_utilization(int verbose_flag)
+int print_power_utilization(int verbose_flag, int rate, int duration)
 {
-	print_ina260_power_info(verbose_flag);
+	print_ina260_power_info(verbose_flag, rate, duration);
 	print_sysmon_power_info(verbose_flag);
 
 	return(0);
@@ -821,7 +857,7 @@ int print_power_utilization(int verbose_flag)
  * @note         None.
  *
  ******************************************************************************/
-void print_all_stats(int verbose_flag)
+void print_all_stats(int verbose_flag, int rate, int duration)
 {
 
 	print_cpu_utilization(verbose_flag);
@@ -830,7 +866,7 @@ void print_all_stats(int verbose_flag)
 
 	print_swap_memory_utilization(verbose_flag);
 
-	print_power_utilization(verbose_flag);
+	print_power_utilization(verbose_flag,rate,duration);
 
 	print_cma_utilization(verbose_flag);
 

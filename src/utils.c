@@ -14,6 +14,30 @@
 /*****************************************************************************/
 /*
  *
+ * This API computes moving average for a stream of data
+ *
+ * @param	arrNums: contains stream of data sum
+ * @param	sum: total sum of stream of data
+ * @param	pos: count of total data in arrNums
+ * @param	len: total length of stream of data
+ * @param	nextNum: next data in stream
+ *
+ * @return	moving average of arrNums
+ *
+ * @note		Internal API only.
+ *
+ ******************************************************************************/
+long movingAvg(long *arrNums, long *sum, int pos, int len, long nextNum)
+{
+	*sum = *sum - arrNums[pos] + nextNum;
+	arrNums[pos] = nextNum;
+
+	return (*sum)/len;
+
+}
+/*****************************************************************************/
+/*
+ *
  * This API skips N number of lines for a file
  *
  * @param	fp: File pointer of the file

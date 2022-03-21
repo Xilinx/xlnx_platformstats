@@ -37,6 +37,12 @@
 /************************** Variable Definitions *****************************/
 static int verbose_flag=0;
 char *filename;
+static int rate=1;
+static int duration=10;
+char *temp;
+char *token;
+int vals[2];
+int i=0;
 
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
@@ -61,10 +67,14 @@ static void print_usage()
 	printf("	Example: platformstats -va \n\n");
 	printf("	         platformstats -v -a \n\n");
 	printf("	         platformstats -l \"log.txt\" \n\n");
+	printf("	         platformstats -p \"1 10\" \n\n");
 	printf(" List of stats to print\n");
 	printf("	-a --all		Print all supported stats.\n");
 	printf("	-c --cpu-util		Print CPU Utilization.\n");
 	printf("	-p --power-util		Print Power Utilization.\n");
+	printf("	          		This option takes two arguments rate & duration.\n");
+	printf("	          		rate: Frequency of readings. Ex 1 sec.\n");
+	printf("	          		duration: Average data collection ranges. Ex 10 sec.\n");
 	printf("	-m --mem-util		Print all Mem Utilization.\n");
 	printf("	-f --cpu-freq		Print CPU frequency.\n");
 	printf("	-v --verbose		Enable verbose prints.\n");
@@ -91,7 +101,7 @@ int main(int argc, char *argv[])
 	};
 
 	/* Parse arguments */
-	while((opt = getopt_long(argc, argv, "voacpmfl:s:h",long_options, &options_index))!=-1)
+	while((opt = getopt_long(argc, argv, "voacmfp:l:s:h",long_options, &options_index))!=-1)
 	{
 		switch(opt)
 		{
@@ -107,13 +117,26 @@ int main(int argc, char *argv[])
 				print_usage();
 				break;
 			case 'a':
-				print_all_stats(verbose_flag);
+				print_all_stats(verbose_flag, rate, duration);
 				break;
 			case 'c':
 				print_cpu_utilization(verbose_flag);
 				break;
 			case 'p':
-				print_power_utilization(verbose_flag);
+				temp = optarg;
+				token = strtok(temp," ");
+				i = 0;
+
+				while(token != NULL)
+				{
+					vals[i++]=atoi(token);
+					token = strtok(NULL," ");
+				}
+
+				rate = vals[0];
+				duration = vals[1];
+
+				print_power_utilization(verbose_flag,rate,duration);
 				break;
 			case 'm':
 				print_cma_utilization(verbose_flag);
@@ -130,7 +153,20 @@ int main(int argc, char *argv[])
 				printf("Option requires an argument to be passed.\n");
 				return(0);
 			default:
-				print_all_stats(verbose_flag);
+				temp  = optarg;
+				token = strtok(temp," ");
+				i = 0;
+
+				while(token != NULL)
+				{
+					vals[i++]=atoi(token);
+					token = strtok(NULL," ");
+				}
+
+				rate = vals[0];
+				duration = vals[1];
+
+				print_all_stats(verbose_flag, rate, duration);
 				return(0);
 		}
 
