@@ -37,8 +37,8 @@
 /************************** Variable Definitions *****************************/
 static int verbose_flag=0;
 char *filename;
-static int rate=1;
-static int duration=10;
+static int rate=0;
+static int duration=1;
 char *temp;
 char *token;
 int vals[2];
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
 	};
 
 	/* Parse arguments */
-	while((opt = getopt_long(argc, argv, "voacmfp:l:s:h",long_options, &options_index))!=-1)
-	{
+	while((opt = getopt_long(argc, argv, "voacmfp::l:s:h",long_options, &options_index))!=-1)
+	{	
 		switch(opt)
 		{
 			case 'v':
@@ -123,19 +123,26 @@ int main(int argc, char *argv[])
 				print_cpu_utilization(verbose_flag);
 				break;
 			case 'p':
-				temp = optarg;
-				token = strtok(temp," ");
-				i = 0;
-
-				while(token != NULL)
+				if(optarg)
 				{
-					vals[i++]=atoi(token);
-					token = strtok(NULL," ");
+					temp = optarg;
+					token = strtok(temp," ");
+					i = 0;
+
+					while(token != NULL)
+					{
+						vals[i++]=atoi(token);
+						token = strtok(NULL," ");
+					}
+
+					rate = vals[0];
+					duration = vals[1];
+
 				}
-
-				rate = vals[0];
-				duration = vals[1];
-
+				else{
+					rate = 0;
+					duration = 1;
+				}
 				print_power_utilization(verbose_flag,rate,duration);
 				break;
 			case 'm':
@@ -148,29 +155,22 @@ int main(int argc, char *argv[])
 				break;
 			case ':':
 				printf("Option requires an argument to be passed.\n");
-				return(0);
+				break;
 			case '?':
 				printf("Option requires an argument to be passed.\n");
-				return(0);
+				break;
 			default:
-				temp  = optarg;
-				token = strtok(temp," ");
-				i = 0;
-
-				while(token != NULL)
-				{
-					vals[i++]=atoi(token);
-					token = strtok(NULL," ");
-				}
-
-				rate = vals[0];
-				duration = vals[1];
-
-				print_all_stats(verbose_flag, rate, duration);
 				return(0);
 		}
 
+		return(0);
+
 	}
+	if(opt == -1)
+	{
+		print_all_stats(verbose_flag, rate, duration);
+	}
+
 	return(0);
 }
 
