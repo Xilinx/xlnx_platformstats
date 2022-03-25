@@ -27,7 +27,7 @@ $(ISRCS): $(INTERFACE)
 	$(SWIG) -python $<
 
 $(PYBIND_LIB): $(ISRCS)
-       $(CC) $(CFLAGS) $(LDFLAGS) -shared $(ISRCS) -o $(PYBIND_LIB) $(LIBS) $(INCLUDES) $(PYTHON_INCLUDE)
+	$(CC) $(CFLAGS) $(LDFLAGS) -shared $(ISRCS) -o $(PYBIND_LIB) $(LIBS) $(INCLUDES) $(PYTHON_INCLUDE)
 
 clean:
 	rm -f *.o *.so* *_wrap* *.pyc *.py __pycache__  platformstats
