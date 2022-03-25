@@ -2,7 +2,8 @@
 
 #Dynamic loading for C
 CC ?= gcc
-CFLAGS ?= -fPIC -shared -Wall -Wextra
+CFLAGS ?= -fPIC -Wall -Wextra
+LDFLAGS ?=
 LIBS = -L../src -L. -lplatformstats
 INCLUDES = -I../include/platformstats
 
@@ -26,8 +27,7 @@ $(ISRCS): $(INTERFACE)
 	$(SWIG) -python $<
 
 $(PYBIND_LIB): $(ISRCS)
-	$(CC) $(CFLAGS) $(ISRCS) -o $(PYBIND_LIB) $(LIBS) $(INCLUDES) $(PYTHON_INCLUDE)
-
+       $(CC) $(CFLAGS) $(LDFLAGS) -shared $(ISRCS) -o $(PYBIND_LIB) $(LIBS) $(INCLUDES) $(PYTHON_INCLUDE)
 
 clean:
 	rm -f *.o *.so* *_wrap* *.pyc *.py __pycache__  platformstats

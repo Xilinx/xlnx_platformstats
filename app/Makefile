@@ -1,7 +1,8 @@
 .PHONY:	clean
 
 CC ?=  gcc
-CFLAGS = -Wall -Wextra
+CFLAGS ?= -Wall -Wextra
+LDFLAGS ?= 
 LIBDIR = ../src
 INCLUDEDIR = ../include/platformstats
 SOURCES = main.c
@@ -13,7 +14,7 @@ all: build
 build: $(APPSTMPS)
 
 %.out: %.o
-	$(CC) -o platformstats main.o -L$(LIBDIR) -lplatformstats
+	$(CC) $(LDFLAGS) -o platformstats main.o -L$(LIBDIR) -lplatformstats
 
 %.o: %.c
 	$(CC) -I$(INCLUDEDIR) $(CFLAGS) -c main.c -o main.o
