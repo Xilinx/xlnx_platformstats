@@ -1,6 +1,6 @@
 /* File : platformstats.h */
 
-%module pbindings
+%module platformstats
 %include "typemaps.i"
 
 %{

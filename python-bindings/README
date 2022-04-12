@@ -1,17 +1,17 @@
 Usage Examples:
 
-import pbindings
-pbindings.print_all_stats(0) //0 for no verbose prints, 1 for verbose prints
-pbindings.print_cpu_utilization(0) 
-pbindings.print_power_utilization(0) 
-pbindings.print_cma_utilization(0) 
-pbindings.print_swap_memory_utilization(0) 
-pbindings.print_ram_memory_utilization(0) 
+import platformstats
+platformstats.print_all_stats(0) //0 for no verbose prints, 1 for verbose prints
+platformstats.print_cpu_utilization(0)
+platformstats.print_power_utilization(0)
+platformstats.print_cma_utilization(0)
+platformstats.print_swap_memory_utilization(0)
+platformstats.print_ram_memory_utilization(0)
 
-pbindings.get_ram_memory_utilization() 	//Returns list [return_val, MemTotal, MemFree, MemAvailable]
-pbindings.get_swap_memory_utilization()	//Returns list [return_val, SwapTotal, SwapFree]
-pbindings.get_cma_utilization()		//Returns list [return_val, CmaTotal, CmaFree]
-pbindings.get_cpu_frequency(0) 		//Returns list [return_val, cpu_freq]
+platformstats.get_ram_memory_utilization() 	//Returns list [return_val, MemTotal, MemFree, MemAvailable]
+platformstats.get_swap_memory_utilization()	//Returns list [return_val, SwapTotal, SwapFree]
+platformstats.get_cma_utilization()		//Returns list [return_val, CmaTotal, CmaFree]
+platformstats.get_cpu_frequency(0) 		//Returns list [return_val, cpu_freq]
 
 ##############
 #To use print_cpu_frequency API need to run python as sudo##
@@ -20,4 +20,4 @@ pbindings.get_cpu_frequency(0) 		//Returns list [return_val, cpu_freq]
 #############
 
 sudo env LD_LIBRARY_PATH=<path to libplatformstats.so.1> python3
-pbindings.print_cpu_frequency(0) 
+platformstats.print_cpu_frequency(0)

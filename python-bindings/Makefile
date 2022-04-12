@@ -19,7 +19,7 @@ ISRCS      = $(IWRAP:.i=.c)
 IOBJS      = $(IWRAP:.i=.o)
 
 INTERFACE = platformstats_bindings.i
-PYBIND_LIB ?= _pbindings.so 
+PYBIND_LIB ?= _platformstats.so
 
 all: $(PYBIND_LIB)
 
