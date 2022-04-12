@@ -125,7 +125,7 @@ double calculate_load(struct cpustat *prev, struct cpustat *curr)
 	total_delta = (double) total_curr - (double) total_prev;
 	idle_delta = (double) idle_curr - (double) idle_prev;
 
-	cpu_util = (1000 * (total_delta - idle_delta) / total_delta + 1) / 10;
+	cpu_util = (1000 * (total_delta - idle_delta) / (total_delta + 1)) / 10;
 
 	return (cpu_util);
 }
@@ -392,7 +392,7 @@ int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, 
 
 	if(fp == NULL)
 	{
-		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		printf("Unable to open /proc/meminfo. Returned errono: %d", errno);
 		return(errno);
 	}
 	else
