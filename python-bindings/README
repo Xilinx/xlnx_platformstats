@@ -8,6 +8,11 @@ pbindings.print_cma_utilization(0)
 pbindings.print_swap_memory_utilization(0) 
 pbindings.print_ram_memory_utilization(0) 
 
+pbindings.get_ram_memory_utilization() 	//Returns list [return_val, MemTotal, MemFree, MemAvailable]
+pbindings.get_swap_memory_utilization()	//Returns list [return_val, SwapTotal, SwapFree]
+pbindings.get_cma_utilization()		//Returns list [return_val, CmaTotal, CmaFree]
+pbindings.get_cpu_frequency(0) 		//Returns list [return_val, cpu_freq]
+
 ##############
 #To use print_cpu_frequency API need to run python as sudo##
 #when running as sudo, LD_LIBRARY_PATH gets overwritten and needs to be passed before calling
