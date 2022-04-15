@@ -874,3 +874,141 @@ void print_all_stats(int verbose_flag, int rate, int duration)
 
 	print_cpu_frequency(verbose_flag);
 }
+
+/*****************************************************************************/
+/*
+ *
+ * This API gets the temperatures listed below.
+ *
+ * @param        LPD_TEMP: LPD temperature (millidegrees C).
+ * @param        FPD_TEMP: FPD temperature (millidegrees C).
+ * @param        PL_TEMP: PL temperature (millidegrees C).
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP)
+{
+	int hwmon_id;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(0,"ams");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ams under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	read_int_sysfs_entry(base_filename,"/temp1_input", hwmon_id, LPD_TEMP);
+	read_int_sysfs_entry(base_filename,"/temp2_input", hwmon_id, FPD_TEMP);
+	read_int_sysfs_entry(base_filename,"/temp3_input", hwmon_id, PL_TEMP);
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API gets the voltages listed below.
+ *
+ * @param        VCC_PSPLL: System PLLs voltage (mV).
+ * @param        PL_VCCINT: PL internal voltage (mV).
+ * @param        VOLT_DDRS: Voltage measurement for six DDR I/O PLLs (mV).
+ * @param        VCC_PSINTFP: VCC_PSINTFP_DDR voltage (mV).
+ * @param        VCC_PS_FPD: VCC PS FPD voltage (mV).
+ * @param        PS_IO_BANK_500: PS IO Bank 500 voltage (mV).
+ * @param        VCC_PS_GTR: VCC PS GTR voltage (mV).
+ * @param        VTT_PS_GTR: VTT PS GTR voltage (mV).
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR)
+{
+	int hwmon_id;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(0,"ams");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ams under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, VCC_PSPLL);
+	read_int_sysfs_entry(base_filename,"/in3_input", hwmon_id, PL_VCCINT);
+	read_int_sysfs_entry(base_filename,"/in6_input", hwmon_id, VOLT_DDRS);
+	read_int_sysfs_entry(base_filename,"/in7_input", hwmon_id, VCC_PSINTFP);
+	read_int_sysfs_entry(base_filename,"/in9_input", hwmon_id, VCC_PS_FPD);
+	read_int_sysfs_entry(base_filename,"/in13_input", hwmon_id, PS_IO_BANK_500);
+	read_int_sysfs_entry(base_filename,"/in16_input", hwmon_id, VCC_PS_GTR);
+	read_int_sysfs_entry(base_filename,"/in17_input", hwmon_id, VTT_PS_GTR);
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API gets the total current for ina260.
+ *
+ * @param        total_current: Total current for ina260 (mA).
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+int get_current(long* total_current)
+{
+	int hwmon_id;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	read_int_sysfs_entry(base_filename,"/curr1_input", hwmon_id, total_current);
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API gets the total power for ina260.
+ *
+ * @param        total_power: Total power for ina260 (microwatts).
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+int get_power(long* total_power)
+{
+	int hwmon_id;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, total_power);
+
+	return(0);
+}
