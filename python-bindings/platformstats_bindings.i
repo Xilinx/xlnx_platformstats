@@ -54,7 +54,7 @@ extern int print_cpu_frequency(int verbose_flag);
 %apply unsigned long *OUTPUT { unsigned long* CmaTotal, unsigned long* CmaFree };
 %apply float *OUTPUT { float* cpu_freq };
 %apply long *OUTPUT { long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP };
-%apply long *OUTPUT { long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR };
+%apply long *OUTPUT { long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR, long* total_voltage };
 %apply long *OUTPUT { long* total_current };
 %apply long *OUTPUT { long* total_power };
 
@@ -65,7 +65,7 @@ extern int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* 
 extern int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree);
 extern int get_cpu_frequency(int cpu_id, float* cpu_freq);
 extern int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP);
-extern int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR);
+extern int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR, long* total_voltage);
 extern int get_current(long* total_current);
 extern int get_power(long* total_power);
 %}

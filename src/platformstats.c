@@ -922,13 +922,14 @@ int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP)
  * @param        PS_IO_BANK_500: PS IO Bank 500 voltage (mV).
  * @param        VCC_PS_GTR: VCC PS GTR voltage (mV).
  * @param        VTT_PS_GTR: VTT PS GTR voltage (mV).
+ * @param        total_voltage: Total voltage for ina260 (mV).
  *
  * @return       Error code.
  *
  * @note         None.
  *
  ******************************************************************************/
-int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR)
+int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR, long* total_voltage)
 {
 	int hwmon_id;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
@@ -949,6 +950,16 @@ int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PS
 	read_int_sysfs_entry(base_filename,"/in13_input", hwmon_id, PS_IO_BANK_500);
 	read_int_sysfs_entry(base_filename,"/in16_input", hwmon_id, VCC_PS_GTR);
 	read_int_sysfs_entry(base_filename,"/in17_input", hwmon_id, VTT_PS_GTR);
+
+	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+
+	if(hwmon_id == -1)
+        {
+                printf("no hwmon device found for ams under /sys/class/hwmon\n");
+                return(0);
+        }
+
+	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, total_voltage);
 
 	return(0);
 }

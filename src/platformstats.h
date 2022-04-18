@@ -39,6 +39,6 @@ int print_cpu_frequency(int verbose_flag);
 int get_cpu_frequency(int cpu_id, float* cpu_freq);
 
 int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP);
-int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR);
+int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR, long* total_voltage);
 int get_current(long* total_current);
 int get_power(long* total_power);
