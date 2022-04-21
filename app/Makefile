@@ -6,7 +6,7 @@ LDFLAGS ?=
 LIBDIR = ../src
 INCLUDEDIR = ../include/platformstats
 SOURCES = main.c
-APPS = main
+APPS = platformstats
 APPSTMPS = main.out
 
 all: build
