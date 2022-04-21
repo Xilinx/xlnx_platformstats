@@ -1,6 +1,7 @@
-.PHONY:	clean
+.PHONY:	clean all build install
 
 CC ?=  gcc
+INSTALL_PROGRAM ?= install
 CFLAGS = -Wall -Wextra
 LIBDIR = ../src
 INCLUDEDIR = ../include/platformstats
@@ -8,9 +9,14 @@ SOURCES = main.c
 APPS = platformstats
 APPSTMPS = main.out
 
+bindir ?= /usr/bin
+
 all: build
 
 build: $(APPSTMPS)
+
+install: $(APPSTMPS)
+	$(INSTALL_PROGRAM) -D -m 755 platformstats $(DESTDIR)$(bindir)/platformstats
 
 %.out: %.o
 	$(CC) -o platformstats main.o -L$(LIBDIR) -lplatformstats
