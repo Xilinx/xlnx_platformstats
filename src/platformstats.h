@@ -20,6 +20,12 @@ int print_cpu_utilization(int verbose_flag);
 double calculate_load(struct cpustat *prev, struct cpustat *curr);
 int print_cpu_stats(struct cpustat *st, int cpu_id);
 int get_stats(struct cpustat *st, int cpunum);
+int get_cpu_stats(struct cpustat *cpu_stat);
+struct cpustat* malloc_cpustat_array();
+int free_cpustat_array(struct cpustat *cpu_stat);
+double* malloc_cpu_util_array();
+int free_cpu_util_array(double *util);
+double* get_cpu_utilization(struct cpustat *prev, struct cpustat *curr, double *util, size_t *len);
 
 int print_ram_memory_utilization(int verbose_flag);
 int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable);

@@ -14,9 +14,18 @@ platformstats.get_cma_utilization()		//Returns list [return_val, CmaTotal, CmaFr
 platformstats.get_cpu_frequency(0) 		//Returns list [return_val, cpu_freq]
 
 platformstats.get_temperatures()		//Returns list [return_val, LPD_TEMP, FPD_TEMP, PL_TEMP]
-platformstats.get_voltages()			//Returns list [return_val, VCC_PSPLL, PL_VCCINT, VOLT_DDRS, VCC_PSINTFP, VCC_PS_FPD, PS_IO_BANK_500, VCC_PS_GTR, VTT_PS_GTR]
+platformstats.get_voltages()			//Returns list [return_val, VCC_PSPLL, PL_VCCINT, VOLT_DDRS, VCC_PSINTFP, VCC_PS_FPD, PS_IO_BANK_500, VCC_PS_GTR, VTT_PS_GTR, total_voltage]
 platformstats.get_current()			//Returns list [return_val, total_current]
 platformstats.get_power()			//Returns list [return_val, total_power]
+
+# To get cpu utilization
+platformstats.stat0 = malloc_cpustat_array()
+platformstats.stat1 = malloc_cpustat_array()
+platformstats.util = malloc_cpu_util_array()
+platformstats.get_cpu_utilization(stat0,stat1,util)	//Returns list of cpu utilization for each cpu
+platformstats.free_cpustat_array(stat0)
+platformstats.free_cpustat_array(stat1)
+platformstats.free_cpu_util_array(util)
 
 ##############
 #To use print_cpu_frequency API need to run python as sudo##

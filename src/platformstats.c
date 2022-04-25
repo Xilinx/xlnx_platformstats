@@ -74,6 +74,181 @@ int get_stats(struct cpustat *cpu_stat, int cpu_id)
 /*****************************************************************************/
 /*
  *
+ * This API opens /proc/stat file to read information for each CPU and store it in struct
+ * /proc/stat displays the following columns of information for any CPU
+ * user: time spent on processes executing in user mode with normal priority
+ * nice: time spent on processes executing in user mode with "niced" priority
+ * system: time spent on processes executing in kernel mode
+ * idle: time spent idling (no CPU instructions) while there were no disk I/O requests
+ * outstanding.
+ * iowait: time spent idling while there were outstanding disk I/O requests.
+ * irq: time spent servicing interrupt requests.
+ * softirq: time spent servicing softirq.
+ *
+ * @param       cpu_stat: store CPU stats
+ *
+ * @return      None.
+ *
+ * @note        Internal API only.
+ *
+ ******************************************************************************/
+int get_cpu_stats(struct cpustat *cpu_stat)
+{
+        FILE *fp;
+        int num_cpus = get_nprocs_conf();
+        int cpu_id = 0;
+
+        fp = fopen("/proc/stat", "r");
+
+        if(fp == NULL)
+        {
+                printf("Unable to open /proc/stat. Returned errono: %d", errno);
+                return(errno);
+        }
+        else
+        {
+                skip_lines(fp, 1);
+                char cpun[255];
+                for(; cpu_id < num_cpus; cpu_id++)
+                {
+                        fscanf(fp,"%s %ld %ld %ld %ld %ld %ld %ld", cpun,
+                                &(cpu_stat[cpu_id].user), &(cpu_stat[cpu_id].nice),
+                                &(cpu_stat[cpu_id].system), &(cpu_stat[cpu_id].idle),
+                                &(cpu_stat[cpu_id].iowait), &(cpu_stat[cpu_id].irq),
+                                &(cpu_stat[cpu_id].softirq));
+
+                        skip_lines(fp, 1);
+
+		}
+                fclose(fp);
+        }
+
+        return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API allocates memory for an array of cpustat structs based on the
+ * number of cpus.
+ *
+ * @param       None
+ *
+ * @return      stat: pointer to array of cpustat structs
+ *
+ * @note        None
+ *
+ ******************************************************************************/
+struct cpustat* malloc_cpustat_array()
+{
+	int num_cpus = get_nprocs_conf();
+	struct cpustat *stat;
+
+	stat = malloc(num_cpus * sizeof (struct cpustat));
+
+	get_cpu_stats(stat);
+
+	return stat;
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API frees memory used by array of cpustat structs.
+ *
+ * @param       cpu_stat: pointer to array of cpustat structs
+ *
+ * @return      None
+ *
+ * @note        None
+ *
+ ******************************************************************************/
+int free_cpustat_array(struct cpustat *cpu_stat)
+{
+	free(cpu_stat);
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API allocates memory for an array of doubles to store the utilization
+ * calculation based on the number of cpus.
+ *
+ * @param       None
+ *
+ * @return      util: pointer to array of doubles
+ *
+ * @note        None
+ *
+ ******************************************************************************/
+double* malloc_cpu_util_array()
+{
+	int num_cpus = get_nprocs_conf();
+	double *util;
+
+	util = malloc(num_cpus * sizeof (double));
+
+	return util;
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API frees memory used by array of doubles.
+ *
+ * @param       util: pointer to array of doubles
+ *
+ * @return      None
+ *
+ * @note        None
+ *
+ ******************************************************************************/
+int free_cpu_util_array(double *util)
+{
+	free(util);
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API reads the CPU stats by calling get_cpu_stats and then calculates
+ * cpu utilization for each CPU based on current and previous reading.
+ *
+ * @param       prev: pointer to the cpustat array for previous reading
+ * @param       curr: pointer to the cpustat array for current reading
+ * @param	util: pointer to the utilization array
+ * @param	len: length of util array (not required in python binding)
+ *
+ * @return      util: pointer to the utilization array
+ *
+ * @note        None.
+ *
+ ******************************************************************************/
+double* get_cpu_utilization(struct cpustat *prev, struct cpustat *curr, double *util, size_t *len)
+{
+	int cpu_id = 0;
+	int num_cpus = get_nprocs_conf();
+	*len = num_cpus;
+
+	memcpy(prev, curr, num_cpus * sizeof (struct cpustat));
+
+	get_cpu_stats(curr);
+
+	for(; cpu_id < num_cpus; cpu_id++)
+	{
+		util[cpu_id] = calculate_load(&prev[cpu_id], &curr[cpu_id]);
+	}
+
+	return(util);
+}
+
+/*****************************************************************************/
+/*
+ *
  * This API prints CPU stats stored in given structure for particular CPU id 
  *
  * @param	cpu_stat: struct that stores CPU stats

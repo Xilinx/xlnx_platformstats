@@ -24,6 +24,10 @@ extern int print_power_utilization(int verbose_flag, int rate, int duration);
 extern int print_ina260_power_info(int verbose_flag, int rate, int duration);
 extern int print_cma_utilization(int verbose_flag);
 extern int print_cpu_frequency(int verbose_flag);
+extern struct cpustat* malloc_cpustat_array();
+extern int free_cpustat_array(struct cpustat *cpu_stat);
+extern double* malloc_cpu_util_array();
+extern int free_cpu_util_array(double *util);
 %}
 
 extern struct cpustat {
@@ -46,9 +50,14 @@ extern int print_power_utilization(int verbose_flag, int rate, int duration);
 extern int print_ina260_power_info(int verbose_flag, int rate, int duration);
 extern int print_cma_utilization(int verbose_flag);
 extern int print_cpu_frequency(int verbose_flag);
+extern struct cpustat* malloc_cpustat_array();
+extern int free_cpustat_array(struct cpustat *cpu_stat);
+extern double* malloc_cpu_util_array();
+extern int free_cpu_util_array(double *util);
 
 /* Apply typemaps to make get_* functions usable in python */
 %apply struct cpustat *OUTPUT { struct cpustat *st };
+%apply struct cpustat *OUTPUT { struct cpustat *cpu_stat };
 %apply unsigned long *OUTPUT { unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable };
 %apply unsigned long *OUTPUT { unsigned long* SwapTotal, unsigned long* SwapFree };
 %apply unsigned long *OUTPUT { unsigned long* CmaTotal, unsigned long* CmaFree };
@@ -58,8 +67,24 @@ extern int print_cpu_frequency(int verbose_flag);
 %apply long *OUTPUT { long* total_current };
 %apply long *OUTPUT { long* total_power };
 
+%typemap(in,numinputs=0,noblock=1) size_t *len  {
+  size_t templen;
+  $1 = &templen;
+}
+
+%typemap(out) double* get_cpu_utilization {
+  int i;
+  $result = PyList_New(templen);
+  for (i = 0; i < templen; i++) {
+    PyObject *o = PyFloat_FromDouble((double)$1[i]);
+    PyList_SetItem($result,i,o);
+  }
+}
+
 %inline %{
 extern int get_stats(struct cpustat *st, int cpunum);
+extern int get_cpu_stats(struct cpustat *cpu_stat);
+extern double* get_cpu_utilization(struct cpustat *prev, struct cpustat *curr, double *util, size_t *len);
 extern int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable);
 extern int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFree);
 extern int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree);
