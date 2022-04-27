@@ -19,9 +19,9 @@ platformstats.get_current()			//Returns list [return_val, total_current]
 platformstats.get_power()			//Returns list [return_val, total_power]
 
 # To get cpu utilization
-platformstats.stat0 = malloc_cpustat_array()
-platformstats.stat1 = malloc_cpustat_array()
-platformstats.util = malloc_cpu_util_array()
+stat0 = platformstats.malloc_cpustat_array()
+stat1 = platformstats.malloc_cpustat_array()
+util = platformstats.malloc_cpu_util_array()
 platformstats.get_cpu_utilization(stat0,stat1,util)	//Returns list of cpu utilization for each cpu
 platformstats.free_cpustat_array(stat0)
 platformstats.free_cpustat_array(stat1)
