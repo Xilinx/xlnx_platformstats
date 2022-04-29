@@ -18,14 +18,10 @@ platformstats.get_voltages()			//Returns list [return_val, VCC_PSPLL, PL_VCCINT,
 platformstats.get_current()			//Returns list [return_val, total_current]
 platformstats.get_power()			//Returns list [return_val, total_power]
 
-# To get cpu utilization
-stat0 = platformstats.malloc_cpustat_array()
-stat1 = platformstats.malloc_cpustat_array()
-util = platformstats.malloc_cpu_util_array()
-platformstats.get_cpu_utilization(stat0,stat1,util)	//Returns list of cpu utilization for each cpu
-platformstats.free_cpustat_array(stat0)
-platformstats.free_cpustat_array(stat1)
-platformstats.free_cpu_util_array(util)
+# To use get_cpu_utilization(), init() must be called first to allocate memory. deinit() will free the memory.
+platformstats.init()
+platformstats.get_cpu_utilization()		//Returns list of cpu utilization for each cpu
+platformstats.deinit()
 
 ##############
 #To use print_cpu_frequency API need to run python as sudo##

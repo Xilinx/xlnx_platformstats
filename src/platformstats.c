@@ -18,6 +18,10 @@
 
 #define MAX_FILENAME_LEN 500
 
+struct cpustat* stat0;
+struct cpustat* stat1;
+double* util_arr;
+
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
 /*
@@ -130,86 +134,50 @@ int get_cpu_stats(struct cpustat *cpu_stat)
 /*
  *
  * This API allocates memory for an array of cpustat structs based on the
- * number of cpus.
+ * number of cpus. stat0, stat1, util_arr are global pointers.
  *
  * @param       None
- *
- * @return      stat: pointer to array of cpustat structs
- *
- * @note        None
- *
- ******************************************************************************/
-struct cpustat* malloc_cpustat_array()
-{
-	int num_cpus = get_nprocs_conf();
-	struct cpustat *stat;
-
-	stat = malloc(num_cpus * sizeof (struct cpustat));
-
-	get_cpu_stats(stat);
-
-	return stat;
-}
-
-/*****************************************************************************/
-/*
- *
- * This API frees memory used by array of cpustat structs.
- *
- * @param       cpu_stat: pointer to array of cpustat structs
  *
  * @return      None
  *
  * @note        None
  *
  ******************************************************************************/
-int free_cpustat_array(struct cpustat *cpu_stat)
-{
-	free(cpu_stat);
-
-	return(0);
-}
-
-/*****************************************************************************/
-/*
- *
- * This API allocates memory for an array of doubles to store the utilization
- * calculation based on the number of cpus.
- *
- * @param       None
- *
- * @return      util: pointer to array of doubles
- *
- * @note        None
- *
- ******************************************************************************/
-double* malloc_cpu_util_array()
+void init()
 {
 	int num_cpus = get_nprocs_conf();
-	double *util;
 
-	util = malloc(num_cpus * sizeof (double));
+	stat0 = malloc(num_cpus * sizeof (struct cpustat));
+	get_cpu_stats(stat0);
 
-	return util;
+	stat1 = malloc(num_cpus * sizeof (struct cpustat));
+	get_cpu_stats(stat1);
+
+	util_arr = malloc(num_cpus * sizeof (double));
+
+	return;
 }
 
 /*****************************************************************************/
 /*
  *
- * This API frees memory used by array of doubles.
+ * This API frees memory used by array of cpustat structs. stat0, stat1,
+ * util_arr are global pointers.
  *
- * @param       util: pointer to array of doubles
+ * @param       None
  *
  * @return      None
  *
  * @note        None
  *
  ******************************************************************************/
-int free_cpu_util_array(double *util)
+void deinit()
 {
-	free(util);
+	free(stat0);
+	free(stat1);
+	free(util_arr);
 
-	return(0);
+	return;
 }
 
 /*****************************************************************************/
@@ -228,22 +196,22 @@ int free_cpu_util_array(double *util)
  * @note        None.
  *
  ******************************************************************************/
-double* get_cpu_utilization(struct cpustat *prev, struct cpustat *curr, double *util, size_t *len)
+double* get_cpu_utilization(size_t *len)
 {
 	int cpu_id = 0;
 	int num_cpus = get_nprocs_conf();
 	*len = num_cpus;
 
-	memcpy(prev, curr, num_cpus * sizeof (struct cpustat));
+	memcpy(stat0, stat1, num_cpus * sizeof (struct cpustat));
 
-	get_cpu_stats(curr);
+	get_cpu_stats(stat1);
 
 	for(; cpu_id < num_cpus; cpu_id++)
 	{
-		util[cpu_id] = calculate_load(&prev[cpu_id], &curr[cpu_id]);
+		util_arr[cpu_id] = calculate_load(&stat0[cpu_id], &stat1[cpu_id]);
 	}
 
-	return(util);
+	return(util_arr);
 }
 
 /*****************************************************************************/
@@ -914,7 +882,7 @@ int print_ina260_power_info(int verbose_flag, int rate, int duration)
 
 		read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, &total_voltage);
 		vol_avg =  movingAvg(volarr, &vol_sum, pos, len, total_voltage);
-		printf("SOM total voltage  :     %ld mV\t SOM avg voltage  :   %ld mV\n\n",total_voltage,vol_avg);
+		printf("SOM total voltage  :     %ld mV\t SOM avg voltage  :    %ld mV\n\n",total_voltage,vol_avg);
 
 		pos++;
 		if(pos >= duration){

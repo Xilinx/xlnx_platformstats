@@ -24,10 +24,8 @@ extern int print_power_utilization(int verbose_flag, int rate, int duration);
 extern int print_ina260_power_info(int verbose_flag, int rate, int duration);
 extern int print_cma_utilization(int verbose_flag);
 extern int print_cpu_frequency(int verbose_flag);
-extern struct cpustat* malloc_cpustat_array();
-extern int free_cpustat_array(struct cpustat *cpu_stat);
-extern double* malloc_cpu_util_array();
-extern int free_cpu_util_array(double *util);
+void init();
+void deinit();
 %}
 
 extern struct cpustat {
@@ -50,10 +48,8 @@ extern int print_power_utilization(int verbose_flag, int rate, int duration);
 extern int print_ina260_power_info(int verbose_flag, int rate, int duration);
 extern int print_cma_utilization(int verbose_flag);
 extern int print_cpu_frequency(int verbose_flag);
-extern struct cpustat* malloc_cpustat_array();
-extern int free_cpustat_array(struct cpustat *cpu_stat);
-extern double* malloc_cpu_util_array();
-extern int free_cpu_util_array(double *util);
+void init();
+void deinit();
 
 /* Apply typemaps to make get_* functions usable in python */
 %apply struct cpustat *OUTPUT { struct cpustat *st };
@@ -84,7 +80,7 @@ extern int free_cpu_util_array(double *util);
 %inline %{
 extern int get_stats(struct cpustat *st, int cpunum);
 extern int get_cpu_stats(struct cpustat *cpu_stat);
-extern double* get_cpu_utilization(struct cpustat *prev, struct cpustat *curr, double *util, size_t *len);
+extern double* get_cpu_utilization(size_t *len);
 extern int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable);
 extern int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFree);
 extern int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree);
