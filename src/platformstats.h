@@ -20,6 +20,10 @@ int print_cpu_utilization(int verbose_flag);
 double calculate_load(struct cpustat *prev, struct cpustat *curr);
 int print_cpu_stats(struct cpustat *st, int cpu_id);
 int get_stats(struct cpustat *st, int cpunum);
+int get_cpu_stats(struct cpustat *cpu_stat);
+void init();
+void deinit();
+double* get_cpu_utilization(size_t *len);
 
 int print_ram_memory_utilization(int verbose_flag);
 int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, unsigned long* MemAvailable);
@@ -37,3 +41,8 @@ int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree);
 
 int print_cpu_frequency(int verbose_flag);
 int get_cpu_frequency(int cpu_id, float* cpu_freq);
+
+int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP);
+int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR, long* total_voltage);
+int get_current(long* total_current);
+int get_power(long* total_power);

@@ -18,6 +18,10 @@
 
 #define MAX_FILENAME_LEN 500
 
+struct cpustat* stat0;
+struct cpustat* stat1;
+double* util_arr;
+
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
 /*
@@ -74,6 +78,145 @@ int get_stats(struct cpustat *cpu_stat, int cpu_id)
 /*****************************************************************************/
 /*
  *
+ * This API opens /proc/stat file to read information for each CPU and store it in struct
+ * /proc/stat displays the following columns of information for any CPU
+ * user: time spent on processes executing in user mode with normal priority
+ * nice: time spent on processes executing in user mode with "niced" priority
+ * system: time spent on processes executing in kernel mode
+ * idle: time spent idling (no CPU instructions) while there were no disk I/O requests
+ * outstanding.
+ * iowait: time spent idling while there were outstanding disk I/O requests.
+ * irq: time spent servicing interrupt requests.
+ * softirq: time spent servicing softirq.
+ *
+ * @param       cpu_stat: store CPU stats
+ *
+ * @return      None.
+ *
+ * @note        Internal API only.
+ *
+ ******************************************************************************/
+int get_cpu_stats(struct cpustat *cpu_stat)
+{
+        FILE *fp;
+        int num_cpus = get_nprocs_conf();
+        int cpu_id = 0;
+
+        fp = fopen("/proc/stat", "r");
+
+        if(fp == NULL)
+        {
+                printf("Unable to open /proc/stat. Returned errono: %d", errno);
+                return(errno);
+        }
+        else
+        {
+                skip_lines(fp, 1);
+                char cpun[255];
+                for(; cpu_id < num_cpus; cpu_id++)
+                {
+                        fscanf(fp,"%s %ld %ld %ld %ld %ld %ld %ld", cpun,
+                                &(cpu_stat[cpu_id].user), &(cpu_stat[cpu_id].nice),
+                                &(cpu_stat[cpu_id].system), &(cpu_stat[cpu_id].idle),
+                                &(cpu_stat[cpu_id].iowait), &(cpu_stat[cpu_id].irq),
+                                &(cpu_stat[cpu_id].softirq));
+
+                        skip_lines(fp, 1);
+
+		}
+                fclose(fp);
+        }
+
+        return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API allocates memory for an array of cpustat structs based on the
+ * number of cpus. stat0, stat1, util_arr are global pointers.
+ *
+ * @param       None
+ *
+ * @return      None
+ *
+ * @note        None
+ *
+ ******************************************************************************/
+void init()
+{
+	int num_cpus = get_nprocs_conf();
+
+	stat0 = malloc(num_cpus * sizeof (struct cpustat));
+	get_cpu_stats(stat0);
+
+	stat1 = malloc(num_cpus * sizeof (struct cpustat));
+	get_cpu_stats(stat1);
+
+	util_arr = malloc(num_cpus * sizeof (double));
+
+	return;
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API frees memory used by array of cpustat structs. stat0, stat1,
+ * util_arr are global pointers.
+ *
+ * @param       None
+ *
+ * @return      None
+ *
+ * @note        None
+ *
+ ******************************************************************************/
+void deinit()
+{
+	free(stat0);
+	free(stat1);
+	free(util_arr);
+
+	return;
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API reads the CPU stats by calling get_cpu_stats and then calculates
+ * cpu utilization for each CPU based on current and previous reading.
+ *
+ * @param       prev: pointer to the cpustat array for previous reading
+ * @param       curr: pointer to the cpustat array for current reading
+ * @param	util: pointer to the utilization array
+ * @param	len: length of util array (not required in python binding)
+ *
+ * @return      util: pointer to the utilization array
+ *
+ * @note        None.
+ *
+ ******************************************************************************/
+double* get_cpu_utilization(size_t *len)
+{
+	int cpu_id = 0;
+	int num_cpus = get_nprocs_conf();
+	*len = num_cpus;
+
+	memcpy(stat0, stat1, num_cpus * sizeof (struct cpustat));
+
+	get_cpu_stats(stat1);
+
+	for(; cpu_id < num_cpus; cpu_id++)
+	{
+		util_arr[cpu_id] = calculate_load(&stat0[cpu_id], &stat1[cpu_id]);
+	}
+
+	return(util_arr);
+}
+
+/*****************************************************************************/
+/*
+ *
  * This API prints CPU stats stored in given structure for particular CPU id 
  *
  * @param	cpu_stat: struct that stores CPU stats
@@ -125,7 +268,7 @@ double calculate_load(struct cpustat *prev, struct cpustat *curr)
 	total_delta = (double) total_curr - (double) total_prev;
 	idle_delta = (double) idle_curr - (double) idle_prev;
 
-	cpu_util = (1000 * (total_delta - idle_delta) / total_delta + 1) / 10;
+	cpu_util = (1000 * (total_delta - idle_delta) / (total_delta + 1)) / 10;
 
 	return (cpu_util);
 }
@@ -392,7 +535,7 @@ int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, 
 
 	if(fp == NULL)
 	{
-		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		printf("Unable to open /proc/meminfo. Returned errono: %d", errno);
 		return(errno);
 	}
 	else
@@ -739,7 +882,7 @@ int print_ina260_power_info(int verbose_flag, int rate, int duration)
 
 		read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, &total_voltage);
 		vol_avg =  movingAvg(volarr, &vol_sum, pos, len, total_voltage);
-		printf("SOM total voltage  :     %ld mV\t SOM avg voltage  :   %ld mV\n\n",total_voltage,vol_avg);
+		printf("SOM total voltage  :     %ld mV\t SOM avg voltage  :    %ld mV\n\n",total_voltage,vol_avg);
 
 		pos++;
 		if(pos >= duration){
@@ -873,4 +1016,153 @@ void print_all_stats(int verbose_flag, int rate, int duration)
 	print_cma_utilization(verbose_flag);
 
 	print_cpu_frequency(verbose_flag);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API gets the temperatures listed below.
+ *
+ * @param        LPD_TEMP: LPD temperature (millidegrees C).
+ * @param        FPD_TEMP: FPD temperature (millidegrees C).
+ * @param        PL_TEMP: PL temperature (millidegrees C).
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP)
+{
+	int hwmon_id;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(0,"ams");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ams under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	read_int_sysfs_entry(base_filename,"/temp1_input", hwmon_id, LPD_TEMP);
+	read_int_sysfs_entry(base_filename,"/temp2_input", hwmon_id, FPD_TEMP);
+	read_int_sysfs_entry(base_filename,"/temp3_input", hwmon_id, PL_TEMP);
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API gets the voltages listed below.
+ *
+ * @param        VCC_PSPLL: System PLLs voltage (mV).
+ * @param        PL_VCCINT: PL internal voltage (mV).
+ * @param        VOLT_DDRS: Voltage measurement for six DDR I/O PLLs (mV).
+ * @param        VCC_PSINTFP: VCC_PSINTFP_DDR voltage (mV).
+ * @param        VCC_PS_FPD: VCC PS FPD voltage (mV).
+ * @param        PS_IO_BANK_500: PS IO Bank 500 voltage (mV).
+ * @param        VCC_PS_GTR: VCC PS GTR voltage (mV).
+ * @param        VTT_PS_GTR: VTT PS GTR voltage (mV).
+ * @param        total_voltage: Total voltage for ina260 (mV).
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR, long* total_voltage)
+{
+	int hwmon_id;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(0,"ams");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ams under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, VCC_PSPLL);
+	read_int_sysfs_entry(base_filename,"/in3_input", hwmon_id, PL_VCCINT);
+	read_int_sysfs_entry(base_filename,"/in6_input", hwmon_id, VOLT_DDRS);
+	read_int_sysfs_entry(base_filename,"/in7_input", hwmon_id, VCC_PSINTFP);
+	read_int_sysfs_entry(base_filename,"/in9_input", hwmon_id, VCC_PS_FPD);
+	read_int_sysfs_entry(base_filename,"/in13_input", hwmon_id, PS_IO_BANK_500);
+	read_int_sysfs_entry(base_filename,"/in16_input", hwmon_id, VCC_PS_GTR);
+	read_int_sysfs_entry(base_filename,"/in17_input", hwmon_id, VTT_PS_GTR);
+
+	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+
+	if(hwmon_id == -1)
+        {
+                printf("no hwmon device found for ams under /sys/class/hwmon\n");
+                return(0);
+        }
+
+	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, total_voltage);
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API gets the total current for ina260.
+ *
+ * @param        total_current: Total current for ina260 (mA).
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+int get_current(long* total_current)
+{
+	int hwmon_id;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	read_int_sysfs_entry(base_filename,"/curr1_input", hwmon_id, total_current);
+
+	return(0);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * This API gets the total power for ina260.
+ *
+ * @param        total_power: Total power for ina260 (microwatts).
+ *
+ * @return       Error code.
+ *
+ * @note         None.
+ *
+ ******************************************************************************/
+int get_power(long* total_power)
+{
+	int hwmon_id;
+	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
+
+	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+
+	if(hwmon_id == -1)
+	{
+		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		return(0);
+	}
+
+	read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, total_power);
+
+	return(0);
 }
