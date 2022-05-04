@@ -6,8 +6,8 @@ INSTALL_PROGRAM ?= install
 CFLAGS 	+= -Wall
 LDFLAGS += -shared
 
-libdir ?= usr/lib
-includedir ?= usr/include
+libdir ?= /usr/lib
+includedir ?= /usr/include
 
 SOURCES = $(shell echo *.c)
 HEADERS = $(shell echo *.h)
