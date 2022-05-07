@@ -1,18 +1,21 @@
-.PHONY:	clean all
+.PHONY:	clean all install
 
 #Dynamic loading for C
 CC ?= gcc
+INSTALL_PROGRAM ?= install
 CFLAGS += -fPIC -Wall -Wextra
 LDFLAGS += -shared -L../src -L.
 LDLIBS += -lplatformstats -lpython$(PYTHON_BASEVERSION)
 INCLUDE_DIR = ../include/platformstats
 
 incdir ?= /usr/include
+libdir ?= /usr/lib
 
 #Python
 PYTHON_BASEVERSION ?= 3.10
 PYTHON_DIR ?= python${PYTHON_BASEVERSION}
 PYTHON_INCLUDE_DIR ?= ${incdir}/$(PYTHON_DIR)
+PYTHON_SITEPACKAGES_DIR ?= ${libdir}/$(PYTHON_DIR)
 
 #Swig
 SWIG ?= swig
@@ -35,3 +38,7 @@ $(PYBIND_LIB): $(ISRCS)
 clean:
 	rm -f *.o *.so* *_wrap* *.pyc *.py __pycache__  platformstats
 
+install: $(PYBIND_LIB)
+	$(INSTALL_PROGRAM) -d $(DESTDIR)${PYTHON_SITEPACKAGES_DIR}/platformstats
+	$(INSTALL_PROGRAM) -m 0644 platformstats.py $(DESTDIR)${PYTHON_SITEPACKAGES_DIR}/platformstats
+	$(INSTALL_PROGRAM) -m 0644 _platformstats.so $(DESTDIR)${PYTHON_SITEPACKAGES_DIR}/platformstats
