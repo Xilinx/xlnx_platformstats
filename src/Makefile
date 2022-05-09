@@ -2,8 +2,12 @@
 
 CC ?=  gcc
 CP = cp
+INSTALL_PROGRAM ?= install
 CFLAGS 	+= -Wall
 LDFLAGS += -shared
+
+libdir ?= /usr/lib
+includedir ?= /usr/include
 
 SOURCES = $(shell echo *.c)
 HEADERS = $(shell echo *.h)
@@ -15,6 +19,11 @@ VERSION = $(MAJOR).$(MINOR)
 NAME := platformstats
 
 all: include lib$(NAME).so
+
+install: all
+	$(INSTALL_PROGRAM) -D -m 644 platformstats.h  $(DESTDIR)$(includedir)/platformstats.h
+	$(INSTALL_PROGRAM) -D -m 644 lib$(NAME).so.$(VERSION) $(DESTDIR)$(libdir)/lib$(NAME).so.$(VERSION)
+	$(CP) -d lib$(NAME).so.$(MAJOR) lib$(NAME).so $(DESTDIR)$(libdir)/
 
 clean:
 	rm -f $(OBJECTS) *.so *.so.*
