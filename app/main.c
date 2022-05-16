@@ -37,8 +37,8 @@
 /************************** Variable Definitions *****************************/
 static int verbose_flag=0;
 char *filename;
-static int rate=0;
-static int duration=1;
+static int sample_interval=0;
+static int sample_window=1;
 char *temp;
 char *token;
 int vals[2];
@@ -67,14 +67,14 @@ static void print_usage()
 	printf("	Example: platformstats -va \n\n");
 	printf("	         platformstats -v -a \n\n");
 	printf("	         platformstats -l \"log.txt\" \n\n");
-	printf("	         platformstats -p \"1 10\" \n\n");
+	printf("	         platformstats -p\"1 10\" \n\n");
 	printf(" List of stats to print\n");
 	printf("	-a --all		Print all supported stats.\n");
 	printf("	-c --cpu-util		Print CPU Utilization.\n");
 	printf("	-p --power-util		Print Power Utilization.\n");
-	printf("	          		This option takes two arguments rate & duration.\n");
-	printf("	          		rate: Frequency of readings. Ex 1 sec.\n");
-	printf("	          		duration: Average data collection ranges. Ex 10 sec.\n");
+	printf("	          		This option takes two optional arguments.\n");
+	printf("	          		sample_interval: Frequency of readings. Ex 1 sec.\n");
+	printf("	          		sample_window: Number of samples in moving average. Ex 10\n");
 	printf("	-m --mem-util		Print all Mem Utilization.\n");
 	printf("	-f --cpu-freq		Print CPU frequency.\n");
 	printf("	-v --verbose		Enable verbose prints.\n");
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 				print_usage();
 				break;
 			case 'a':
-				print_all_stats(verbose_flag, rate, duration);
+				print_all_stats(verbose_flag, sample_interval, sample_window);
 				break;
 			case 'c':
 				print_cpu_utilization(verbose_flag);
@@ -135,15 +135,15 @@ int main(int argc, char *argv[])
 						token = strtok(NULL," ");
 					}
 
-					rate = vals[0];
-					duration = vals[1];
+					sample_interval = vals[0];
+					sample_window = vals[1];
 
 				}
 				else{
-					rate = 0;
-					duration = 1;
+					sample_interval = 0;
+					sample_window = 1;
 				}
-				print_power_utilization(verbose_flag,rate,duration);
+				print_power_utilization(verbose_flag,sample_interval,sample_window);
 				break;
 			case 'm':
 				print_cma_utilization(verbose_flag);
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 	}
 	if(opt == -1)
 	{
-		print_all_stats(verbose_flag, rate, duration);
+		print_all_stats(verbose_flag, sample_interval, sample_window);
 	}
 
 	return(0);
