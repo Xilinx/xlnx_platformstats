@@ -29,6 +29,7 @@
 #include <getopt.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <time.h>
 #include <platformstats.h>
 
 
@@ -37,6 +38,7 @@
 /************************** Variable Definitions *****************************/
 static int verbose_flag=0;
 char *filename;
+FILE *fp_out;
 static int sample_interval=0;
 static int sample_window=1;
 char *temp;
@@ -66,7 +68,7 @@ static void print_usage()
 	printf("	can combine multiple options at the same time.\n\n");
 	printf("	Example: platformstats -va \n\n");
 	printf("	         platformstats -v -a \n\n");
-	printf("	         platformstats -l \"log.txt\" \n\n");
+	printf("	         platformstats -l \"log.txt\" -a \n\n");
 	printf("	         platformstats -p\"1 10\" \n\n");
 	printf(" List of stats to print\n");
 	printf("	-a --all		Print all supported stats.\n");
@@ -84,6 +86,7 @@ static void print_usage()
 
 int main(int argc, char *argv[])
 {
+	fp_out = stdout;
 	int opt,options_index = 0;
 	static struct option long_options[] =
 	{
@@ -100,75 +103,74 @@ int main(int argc, char *argv[])
 		{0,0,0,0}
 	};
 
-	/* Parse arguments */
-	while((opt = getopt_long(argc, argv, "voacmfp::l:s:h",long_options, &options_index))!=-1)
-	{	
-		switch(opt)
-		{
-			case 'v':
-				verbose_flag = 1;
-				break;
-			case 'l':
-				filename = optarg;
-				int fd = open(filename, O_CREAT | O_WRONLY | O_APPEND, 0755);
-				dup2(fd,1);
-				break;
-			case 'h':
-				print_usage();
-				break;
-			case 'a':
-				print_all_stats(verbose_flag, sample_interval, sample_window);
-				break;
-			case 'c':
-				print_cpu_utilization(verbose_flag);
-				break;
-			case 'p':
-				if(optarg)
-				{
-					temp = optarg;
-					token = strtok(temp," ");
-					i = 0;
-
-					while(token != NULL)
-					{
-						vals[i++]=atoi(token);
-						token = strtok(NULL," ");
-					}
-
-					sample_interval = vals[0];
-					sample_window = vals[1];
-
-				}
-				else{
-					sample_interval = 0;
-					sample_window = 1;
-				}
-				print_power_utilization(verbose_flag,sample_interval,sample_window);
-				break;
-			case 'm':
-				print_cma_utilization(verbose_flag);
-				print_swap_memory_utilization(verbose_flag);
-				print_ram_memory_utilization(verbose_flag);
-				break;
-			case 'f':
-				print_cpu_frequency(verbose_flag);
-				break;
-			case ':':
-				printf("Option requires an argument to be passed.\n");
-				break;
-			case '?':
-				printf("Option requires an argument to be passed.\n");
-				break;
-			default:
-				return(0);
-		}
-
-		return(0);
-
-	}
-	if(opt == -1)
+	if(argc == 1)
 	{
 		print_all_stats(verbose_flag, sample_interval, sample_window);
+	}
+	else
+	{
+		/* Parse arguments */
+		while((opt = getopt_long(argc, argv, "voacmfp::l:s:h",long_options, &options_index))!=-1)
+		{
+			switch(opt)
+			{
+				case 'v':
+					verbose_flag = 1;
+					break;
+				case 'l':
+					filename = optarg;
+					fp_out = fopen(filename, "w");
+					time_t rawtime;
+					time(&rawtime);
+					fprintf(fp_out, "Log file created on: %s\n", ctime(&rawtime));
+					break;
+				case 'h':
+					print_usage();
+					break;
+				case 'a':
+					print_all_stats(verbose_flag, sample_interval, sample_window);
+					break;
+				case 'c':
+					print_cpu_utilization(verbose_flag);
+					break;
+				case 'p':
+					if(optarg)
+					{
+						temp = optarg;
+						token = strtok(temp," ");
+						i = 0;
+						while(token != NULL)
+						{
+							vals[i++]=atoi(token);
+							token = strtok(NULL," ");
+						}
+						sample_interval = vals[0];
+						sample_window = vals[1];
+					}
+					else{
+						sample_interval = 0;
+						sample_window = 1;
+					}
+					print_power_utilization(verbose_flag,sample_interval,sample_window);
+					break;
+				case 'm':
+					print_cma_utilization(verbose_flag);
+					print_swap_memory_utilization(verbose_flag);
+					print_ram_memory_utilization(verbose_flag);
+					break;
+				case 'f':
+					print_cpu_frequency(verbose_flag);
+					break;
+				case ':':
+					printf("Option requires an argument to be passed.\n");
+					break;
+				case '?':
+					printf("Option requires an argument to be passed.\n");
+					break;
+				default:
+					return(0);
+			}
+		}
 	}
 
 	return(0);
