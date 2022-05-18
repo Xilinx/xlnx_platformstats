@@ -68,12 +68,12 @@ static void print_usage()
 	printf("	can combine multiple options at the same time.\n\n");
 	printf("	Example: platformstats -va \n\n");
 	printf("	         platformstats -v -a \n\n");
-	printf("	         platformstats -l \"log.txt\" -a \n\n");
+	printf("	         platformstats -l \"log.txt\" -p\"1 10\" \n\n");
 	printf("	         platformstats -p\"1 10\" \n\n");
 	printf(" List of stats to print\n");
 	printf("	-a --all		Print all supported stats.\n");
 	printf("	-c --cpu-util		Print CPU Utilization.\n");
-	printf("	-p --power-util		Print Power Utilization.\n");
+	printf("	-p --power-util		Print Power and Temperature Info.\n");
 	printf("	          		This option takes two optional arguments.\n");
 	printf("	          		sample_interval: Frequency of readings. Ex 1 sec.\n");
 	printf("	          		sample_window: Number of samples in moving average. Ex 10\n");
@@ -109,20 +109,37 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
+		/* Process -v and -l options first */
+		int i;
+		for(i=0; i<argc; i++)
+		{
+			if(strcmp(argv[i],"-v")==0)
+			{
+				verbose_flag = 1;
+			}
+			if(strcmp(argv[i],"-l")==0)
+			{
+				if(i >= (argc-1))
+				{
+					printf("-l option requires an argument to be passed.\n");
+					return(0);
+				}
+				filename = argv[i+1];
+				fp_out = fopen(filename, "w");
+				time_t rawtime;
+				time(&rawtime);
+				fprintf(fp_out, "Log file created on: %s\n", ctime(&rawtime));
+			}
+		}
+
 		/* Parse arguments */
 		while((opt = getopt_long(argc, argv, "voacmfp::l:s:h",long_options, &options_index))!=-1)
 		{
 			switch(opt)
 			{
 				case 'v':
-					verbose_flag = 1;
 					break;
 				case 'l':
-					filename = optarg;
-					fp_out = fopen(filename, "w");
-					time_t rawtime;
-					time(&rawtime);
-					fprintf(fp_out, "Log file created on: %s\n", ctime(&rawtime));
 					break;
 				case 'h':
 					print_usage();

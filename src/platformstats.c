@@ -13,6 +13,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/sysinfo.h>
+#include <time.h>
 
 #include "platformstats.h"
 #include "utils.h"
@@ -920,6 +921,14 @@ int print_ina260_power_info(int verbose_flag, int sample_interval, int sample_wi
 		curr_avg = movingAvg(currarr, &curr_sum, pos, len, total_current);
 		vol_avg = movingAvg(volarr, &vol_sum, pos, len, total_voltage);
 
+		if(fp_out == stdout)
+		{
+			system("clear");
+		}
+		fprintf(fp_out, "----------------------------------------------------------------------------------------\n");
+		time_t rawtime;
+		time(&rawtime);
+		fprintf(fp_out, "%d samples collected on %s\n", sample_window, ctime(&rawtime));
 		fprintf(fp_out, "                                                           Instantaneous\t Average\n");
 		fprintf(fp_out, "Power Utilization\n");
 		fprintf(fp_out, "SOM total power                                         :     %ld mW\t\t %ld mW\n",(total_power)/1000, power_avg);
