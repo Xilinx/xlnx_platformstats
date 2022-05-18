@@ -6,21 +6,41 @@
 /******************************************************************************/
 /***************************** Include Files *********************************/
 #include <stdio.h>
+#include <signal.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <string.h>
 #include <sys/sysinfo.h>
+#include <time.h>
 
 #include "platformstats.h"
 #include "utils.h"
 
 #define MAX_FILENAME_LEN 500
 
+extern FILE *fp_out;
+
 struct cpustat* stat0;
 struct cpustat* stat1;
 double* util_arr;
+
+long* powerarr;
+long* currarr;
+long* volarr;
+
+long* LPD_TEMP_arr;
+long* FPD_TEMP_arr;
+long* PL_TEMP_arr;
+long* VCC_PSPLL_arr;
+long* PL_VCCINT_arr;
+long* VOLT_DDRS_arr;
+long* VCC_PSINTFP_arr;
+long* VCC_PS_FPD_arr;
+long* PS_IO_BANK_500_arr;
+long* VCC_PS_GTR_arr;
+long* VTT_PS_GTR_arr;
 
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
@@ -53,7 +73,7 @@ int get_stats(struct cpustat *cpu_stat, int cpu_id)
 
 	if(fp == NULL)
 	{
-		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		fprintf(fp_out, "Unable to open /proc/stat. Returned errono: %d", errno);
 		return(errno);
 	}
 	else
@@ -106,7 +126,7 @@ int get_cpu_stats(struct cpustat *cpu_stat)
 
         if(fp == NULL)
         {
-                printf("Unable to open /proc/stat. Returned errono: %d", errno);
+                fprintf(fp_out, "Unable to open /proc/stat. Returned errono: %d", errno);
                 return(errno);
         }
         else
@@ -229,7 +249,7 @@ double* get_cpu_utilization(size_t *len)
  ******************************************************************************/
 int print_cpu_stats(struct cpustat *st, int cpu_id)
 {
-	printf("CPU%d: %ld %ld %ld %ld %ld %ld %ld\n", cpu_id, (st->user), (st->nice), 
+	fprintf(fp_out, "CPU%d: %ld %ld %ld %ld %ld %ld %ld\n", cpu_id, (st->user), (st->nice), 
 			(st->system), (st->idle), (st->iowait), (st->irq),
 			(st->softirq));
 
@@ -300,11 +320,11 @@ int print_cpu_utilization(int verbose_flag)
 
 	if(!st0_0 || !st0_1)
 	{
-		printf("Unable to allocate memory, malloc failed");
+		fprintf(fp_out, "Unable to allocate memory, malloc failed");
 		return(errno);
 	}
 
-	printf("CPU Utilization\n");
+	fprintf(fp_out, "CPU Utilization\n");
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		st0_0[cpu_id].total_util = 0;
@@ -312,7 +332,7 @@ int print_cpu_utilization(int verbose_flag)
 
 		if(verbose_flag)
 		{
-			printf("cpu_id=%d\nStats at t0\n",cpu_id);
+			fprintf(fp_out, "cpu_id=%d\nStats at t0\n",cpu_id);
 			print_cpu_stats(&st0_0[cpu_id],cpu_id);
 		}
 	}
@@ -329,13 +349,13 @@ int print_cpu_utilization(int verbose_flag)
 
 		if(verbose_flag)
 		{
-			printf("Stats at t1 after 1s\n");
+			fprintf(fp_out, "Stats at t1 after 1s\n");
 			print_cpu_stats(&st0_1[cpu_id],cpu_id);
 		}
-		printf("CPU%d\t:     %lf%%\n",cpu_id,st0_1[cpu_id].total_util);
+		fprintf(fp_out, "CPU%d\t:     %lf%%\n",cpu_id,st0_1[cpu_id].total_util);
 	}
 
-	printf("\n");
+	fprintf(fp_out, "\n");
 	free(st0_0);
 	free(st0_1);
 
@@ -367,7 +387,7 @@ static void read_int_sysfs_entry(char* base_filename, char* filepath, int id, lo
 	fp = fopen(filename, "r");
 	if(fp == NULL)
 	{
-		printf(" File open returned with error : %s\n", strerror(errno));
+		fprintf(fp_out, " File open returned with error : %s\n", strerror(errno));
 		exit(0);
 	}
 
@@ -400,7 +420,7 @@ static void read_float_sysfs_entry(char* base_filename, char* filepath, int id, 
 	fp = fopen(filename, "r");
 	if(fp == NULL)
 	{
-		printf(" File open returned with error : %s\n", strerror(errno));
+		fprintf(fp_out, " File open returned with error : %s\n", strerror(errno));
 		exit(0);
 	}
 
@@ -436,7 +456,7 @@ static int read_char_sysfs_entry(char* base_filename, char* filepath, int id, ch
 
 	if(fp == NULL)
 	{
-		printf("Unable to open %s\n",filename);
+		fprintf(fp_out, "Unable to open %s\n",filename);
 		exit(0);
 	}
 
@@ -493,13 +513,13 @@ int print_cpu_frequency(int verbose_flag)
 	num_cpus_conf= get_nprocs_conf();
 	cpu_id=0;
 
-	printf("CPU Frequency\n");
+	fprintf(fp_out, "CPU Frequency\n");
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		get_cpu_frequency(cpu_id,&cpu_freq);
-		printf("CPU%d\t:    %f MHz\n",cpu_id,(cpu_freq)/1000);
+		fprintf(fp_out, "CPU%d\t:    %f MHz\n",cpu_id,(cpu_freq)/1000);
 	}
-	printf("\n");
+	fprintf(fp_out, "\n");
 
 	return(0);
 }
@@ -535,7 +555,7 @@ int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, 
 
 	if(fp == NULL)
 	{
-		printf("Unable to open /proc/meminfo. Returned errono: %d", errno);
+		fprintf(fp_out, "Unable to open /proc/meminfo. Returned errono: %d", errno);
 		return(errno);
 	}
 	else
@@ -586,10 +606,10 @@ int print_ram_memory_utilization(int verbose_flag)
 
 	mem_util_ret = get_ram_memory_utilization(&MemTotal, &MemFree, &MemAvailable);
 
-	printf("RAM Utilization\n");
-	printf("MemTotal      :     %ld kB\n",MemTotal);
-	printf("MemFree	      :     %ld kB\n", MemFree);
-	printf("MemAvailable  :     %ld kB\n\n", MemAvailable);
+	fprintf(fp_out, "RAM Utilization\n");
+	fprintf(fp_out, "MemTotal      :     %ld kB\n",MemTotal);
+	fprintf(fp_out, "MemFree	      :     %ld kB\n", MemFree);
+	fprintf(fp_out, "MemAvailable  :     %ld kB\n\n", MemAvailable);
 
 	return(mem_util_ret);
 
@@ -617,7 +637,7 @@ int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree)
 
 	if(fp == NULL)
 	{
-		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		fprintf(fp_out, "Unable to open /proc/stat. Returned errono: %d", errno);
 		return(errno);
 	}
 	else
@@ -660,9 +680,9 @@ int print_cma_utilization(int verbose_flag)
 
 	cma_util_ret = get_cma_utilization(&CmaTotal, &CmaFree);
 
-	printf("CMA Mem Utilization\n");
-	printf("CmaTotal   :     %ld kB\n",CmaTotal);
-	printf("CmaFree    :     %ld kB\n\n", CmaFree);
+	fprintf(fp_out, "CMA Mem Utilization\n");
+	fprintf(fp_out, "CmaTotal   :     %ld kB\n",CmaTotal);
+	fprintf(fp_out, "CmaFree    :     %ld kB\n\n", CmaFree);
 
 	return(cma_util_ret);
 
@@ -692,7 +712,7 @@ int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFre
 
 	if(fp == NULL)
 	{
-		printf("Unable to open /proc/stat. Returned errono: %d", errno);
+		fprintf(fp_out, "Unable to open /proc/stat. Returned errono: %d", errno);
 		return(errno);
 	}
 	else
@@ -736,9 +756,9 @@ int print_swap_memory_utilization(int verbose_flag)
 
 	mem_util_ret = get_swap_memory_utilization(&SwapTotal, &SwapFree);
 
-	printf("Swap Mem Utilization\n");
-	printf("SwapTotal    :    %ld kB\n",SwapTotal);
-	printf("SwapFree     :    %ld kB\n\n",SwapFree);
+	fprintf(fp_out, "Swap Mem Utilization\n");
+	fprintf(fp_out, "SwapTotal    :    %ld kB\n",SwapTotal);
+	fprintf(fp_out, "SwapFree     :    %ld kB\n\n",SwapFree);
 
 	return(mem_util_ret);
 
@@ -766,7 +786,7 @@ int count_hwmon_reg_devices()
 
 	if(!d)
 	{
-		printf("Unable to open /sys/class/hwmon path\n");
+		fprintf(fp_out, "Unable to open /sys/class/hwmon path\n");
 		return(errno);
 	}
 
@@ -818,12 +838,39 @@ int get_device_hwmon_id(int verbose_flag, char* name)
 
 		if(verbose_flag)
 		{
-			printf("filename %s\n",filename);
-			printf("device_name = %s\n",device_name);
+			fprintf(fp_out, "filename %s\n",filename);
+			fprintf(fp_out, "device_name = %s\n",device_name);
 		}
 	}
 
 	return(-1);
+}
+
+/*****************************************************************************/
+/*
+ *
+ * Signal Handler for SIGINT, runs when user presses Ctrl+C
+ *
+ ******************************************************************************/
+void sigint_handler(int sig_num)
+{
+	free(powerarr);
+	free(currarr);
+	free(volarr);
+
+	free(LPD_TEMP_arr);
+	free(FPD_TEMP_arr);
+	free(PL_TEMP_arr);
+	free(VCC_PSPLL_arr);
+	free(PL_VCCINT_arr);
+	free(VOLT_DDRS_arr);
+	free(VCC_PSINTFP_arr);
+	free(VCC_PS_FPD_arr);
+	free(PS_IO_BANK_500_arr);
+	free(VCC_PS_GTR_arr);
+	free(VTT_PS_GTR_arr);
+
+	exit(0);
 }
 
 /*****************************************************************************/
@@ -838,68 +885,63 @@ int get_device_hwmon_id(int verbose_flag, char* name)
  *
  * @return       Error code.
  *
- * @note         None.
+ * @note         Internal API.
  *
  ******************************************************************************/
-int print_ina260_power_info(int verbose_flag, int rate, int duration)
+int print_ina260_power_info(int verbose_flag, int sample_interval, int sample_window, int pos, int len)
 {
 	int hwmon_id;
 	long total_power, total_current, total_voltage;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
 
-	int pos = 0;
-	int len = pos+1;
-	long* powerarr = (long*)calloc(duration,sizeof(long));
-	long power_avg = 0;
-	long power_sum = 0;
-
-	long *currarr = (long*)calloc(duration,sizeof(long));
-	long curr_avg = 0;
-	long curr_sum = 0;
-
-	long *volarr = (long*)calloc(duration,sizeof(long));
-	long vol_avg = 0;
-	long vol_sum = 0;
-
 	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260_u14");
 
-	printf("Power Utilization\n");
 	if(hwmon_id == -1)
 	{
-		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
 		return(0);
 	}
 
-	for(int i = 0; i < duration; i++ )
+	read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, &total_power);
+	read_int_sysfs_entry(base_filename,"/curr1_input", hwmon_id, &total_current);
+	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, &total_voltage);
+
+	if(sample_interval > 0)
 	{
-		read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, &total_power);
+		static long power_avg = 0;
+		static long power_sum = 0;
+
+		static long curr_avg = 0;
+		static long curr_sum = 0;
+
+		static long vol_avg = 0;
+		static long vol_sum = 0;
+
 		power_avg = movingAvg(powerarr, &power_sum, pos, len, (total_power)/1000);
-		printf("SOM total power    :     %ld mW\t SOM avg power    :    %ld mW\n",(total_power)/1000, power_avg);
+		curr_avg = movingAvg(currarr, &curr_sum, pos, len, total_current);
+		vol_avg = movingAvg(volarr, &vol_sum, pos, len, total_voltage);
 
-		read_int_sysfs_entry(base_filename,"/curr1_input", hwmon_id, &total_current);
-		curr_avg =  movingAvg(currarr, &curr_sum, pos, len, total_current);
-		printf("SOM total current  :     %ld mA\t\t SOM avg current  :    %ld mA\n",total_current, curr_avg);
-
-		read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, &total_voltage);
-		vol_avg =  movingAvg(volarr, &vol_sum, pos, len, total_voltage);
-		printf("SOM total voltage  :     %ld mV\t SOM avg voltage  :    %ld mV\n\n",total_voltage,vol_avg);
-
-		pos++;
-		if(pos >= duration){
-			pos = 0;
+		if(fp_out == stdout)
+		{
+			system("clear");
 		}
-
-		len++;
-		if(len > duration){
-			len=duration;
-		}
-
-		sleep(rate);
+		fprintf(fp_out, "----------------------------------------------------------------------------------------\n");
+		time_t rawtime;
+		time(&rawtime);
+		fprintf(fp_out, "%d samples averaged on %s\n", len, ctime(&rawtime));
+		fprintf(fp_out, "                                                           Instantaneous\t Average\n");
+		fprintf(fp_out, "Power Utilization\n");
+		fprintf(fp_out, "SOM total power                                         :     %ld mW\t\t %ld mW\n",(total_power)/1000, power_avg);
+		fprintf(fp_out, "SOM total current                                       :     %ld mA\t\t %ld mA\n",total_current, curr_avg);
+		fprintf(fp_out, "SOM total voltage                                       :     %ld mV\t\t %ld mV\n\n",total_voltage,vol_avg);
 	}
-
-	free(powerarr);
-	free(currarr);
-	free(volarr);
+	else
+	{
+		fprintf(fp_out, "Power Utilization\n");
+		fprintf(fp_out, "SOM total power                                         :     %ld mW\n",(total_power)/1000);
+		fprintf(fp_out, "SOM total current                                       :     %ld mA\n",total_current);
+		fprintf(fp_out, "SOM total voltage                                       :     %ld mV\n\n",total_voltage);
+	}
 
 	return(0);
 }
@@ -907,19 +949,18 @@ int print_ina260_power_info(int verbose_flag, int rate, int duration)
 /*****************************************************************************/
 /*
  *
- * This API prints the following information from sysmon driver:
- * in1_input: Voltage input value.
- * curr1_input: Current input value.
- * power1_input: Instantaneous power use
+ * This API prints power utilization information for the system.
  *
  * @param        verbose_flag: Enable verbose prints
+ * @param        sample_interval: Frequency of readings. Ex 1 sec
+ * @param        sample_window: Number of samples in moving average. Ex 10
  *
  * @return       Error code.
  *
- * @note         None.
+ * @note         Internal API.
  *
  ******************************************************************************/
-int print_sysmon_power_info(int verbose_flag)
+int print_sysmon_power_info(int verbose_flag, int sample_interval, int sample_window, int pos, int len)
 {
 	int hwmon_id;
 	long LPD_TEMP, FPD_TEMP, PL_TEMP;
@@ -932,11 +973,10 @@ int print_sysmon_power_info(int verbose_flag)
 
 	if(hwmon_id == -1)
 	{
-		printf("no hwmon device found for ams under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ams under /sys/class/hwmon\n");
 		return(0);
 	}
 
-	//printf("hwmon device found, device_id is %d \n",hwmon_id);
 	read_int_sysfs_entry(base_filename,"/temp1_input", hwmon_id, &LPD_TEMP);
 	read_int_sysfs_entry(base_filename,"/temp2_input", hwmon_id, &FPD_TEMP);
 	read_int_sysfs_entry(base_filename,"/temp3_input", hwmon_id, &PL_TEMP);
@@ -949,22 +989,90 @@ int print_sysmon_power_info(int verbose_flag)
 	read_int_sysfs_entry(base_filename,"/in16_input", hwmon_id, &VCC_PS_GTR);
 	read_int_sysfs_entry(base_filename,"/in17_input", hwmon_id, &VTT_PS_GTR);
 
-	printf("AMS CTRL\n");
-	printf("System PLLs voltage measurement, VCC_PSLL   		:     %ld mV\n",VCC_PSPLL);
-	printf("PL internal voltage measurement, VCC_PSBATT 		:     %ld mV\n",PL_VCCINT);
-	printf("Voltage measurement for six DDR I/O PLLs, VCC_PSDDR_PLL :     %ld mV\n",VOLT_DDRS);
-	printf("VCC_PSINTFP_DDR voltage measurement         		:     %ld mV\n\n",VCC_PSINTFP);
+	if(sample_interval > 0)
+	{
+		static long LPD_TEMP_avg = 0;
+		static long LPD_TEMP_sum = 0;
 
-	printf("PS Sysmon\n");
-	printf("LPD temperature measurement 		    		:     %ld C\n",(LPD_TEMP)/1000);
-	printf("FPD temperature measurement (REMOTE)  		    	:     %ld C\n",(FPD_TEMP)/1000);
-	printf("VCC PS FPD voltage measurement (supply 2)   		:     %ld mV\n",VCC_PS_FPD);
-	printf("PS IO Bank 500 voltage measurement (supply 6)		:     %ld mV\n",PS_IO_BANK_500);
-	printf("VCC PS GTR voltage   					:     %ld mV\n",VCC_PS_GTR);
-	printf("VTT PS GTR voltage    					:     %ld mV\n\n",VTT_PS_GTR);
+		static long FPD_TEMP_avg = 0;
+		static long FPD_TEMP_sum = 0;
 
-	printf("PL Sysmon\n");
-	printf("PL temperature    					:     %ld C\n\n",(PL_TEMP)/1000);
+		static long PL_TEMP_avg = 0;
+		static long PL_TEMP_sum = 0;
+
+		static long VCC_PSPLL_avg = 0;
+		static long VCC_PSPLL_sum = 0;
+
+		static long PL_VCCINT_avg = 0;
+		static long PL_VCCINT_sum = 0;
+
+		static long VOLT_DDRS_avg = 0;
+		static long VOLT_DDRS_sum = 0;
+
+		static long VCC_PSINTFP_avg = 0;
+		static long VCC_PSINTFP_sum = 0;
+
+		static long VCC_PS_FPD_avg = 0;
+		static long VCC_PS_FPD_sum = 0;
+
+		static long PS_IO_BANK_500_avg = 0;
+		static long PS_IO_BANK_500_sum = 0;
+
+		static long VCC_PS_GTR_avg = 0;
+		static long VCC_PS_GTR_sum = 0;
+
+		static long VTT_PS_GTR_avg = 0;
+		static long VTT_PS_GTR_sum = 0;
+
+		LPD_TEMP_avg = movingAvg(LPD_TEMP_arr, &LPD_TEMP_sum, pos, len, LPD_TEMP);
+		FPD_TEMP_avg = movingAvg(FPD_TEMP_arr, &FPD_TEMP_sum, pos, len, FPD_TEMP);
+		PL_TEMP_avg = movingAvg(PL_TEMP_arr, &PL_TEMP_sum, pos, len, PL_TEMP);
+		VCC_PSPLL_avg = movingAvg(VCC_PSPLL_arr, &VCC_PSPLL_sum, pos, len, VCC_PSPLL);
+		PL_VCCINT_avg = movingAvg(PL_VCCINT_arr, &PL_VCCINT_sum, pos, len, PL_VCCINT);
+		VOLT_DDRS_avg = movingAvg(VOLT_DDRS_arr, &VOLT_DDRS_sum, pos, len, VOLT_DDRS);
+		VCC_PSINTFP_avg = movingAvg(VCC_PSINTFP_arr, &VCC_PSINTFP_sum, pos, len, VCC_PSINTFP);
+		VCC_PS_FPD_avg = movingAvg(VCC_PS_FPD_arr, &VCC_PS_FPD_sum, pos, len, VCC_PS_FPD);
+		PS_IO_BANK_500_avg = movingAvg(PS_IO_BANK_500_arr, &PS_IO_BANK_500_sum, pos, len, PS_IO_BANK_500);
+		VCC_PS_GTR_avg = movingAvg(VCC_PS_GTR_arr, &VCC_PS_GTR_sum, pos, len, VCC_PS_GTR);
+		VTT_PS_GTR_avg = movingAvg(VTT_PS_GTR_arr, &VTT_PS_GTR_sum, pos, len, VTT_PS_GTR);
+
+		fprintf(fp_out, "AMS CTRL\n");
+		fprintf(fp_out, "System PLLs voltage measurement, VCC_PSLL   		:     %ld mV\t\t %ld mV\n",VCC_PSPLL,VCC_PSPLL_avg);
+		fprintf(fp_out, "PL internal voltage measurement, VCC_PSBATT 		:     %ld mV\t\t %ld mV\n",PL_VCCINT,PL_VCCINT_avg);
+		fprintf(fp_out, "Voltage measurement for six DDR I/O PLLs, VCC_PSDDR_PLL :     %ld mV\t\t %ld mV\n",VOLT_DDRS,VOLT_DDRS_avg);
+		fprintf(fp_out, "VCC_PSINTFP_DDR voltage measurement         		:     %ld mV\t\t %ld mV\n\n",VCC_PSINTFP,VCC_PSINTFP_avg);
+
+		fprintf(fp_out, "PS Sysmon\n");
+		fprintf(fp_out, "LPD temperature measurement 		    		:     %ld C\t\t %ld C\n",(LPD_TEMP)/1000,(LPD_TEMP_avg)/1000);
+		fprintf(fp_out, "FPD temperature measurement (REMOTE)  		    	:     %ld C\t\t %ld C\n",(FPD_TEMP)/1000,(FPD_TEMP_avg)/1000);
+		fprintf(fp_out, "VCC PS FPD voltage measurement (supply 2)   		:     %ld mV\t\t %ld mV\n",VCC_PS_FPD,VCC_PS_FPD_avg);
+		fprintf(fp_out, "PS IO Bank 500 voltage measurement (supply 6)		:     %ld mV\t\t %ld mV\n",PS_IO_BANK_500,PS_IO_BANK_500_avg);
+		fprintf(fp_out, "VCC PS GTR voltage   					:     %ld mV\t\t %ld mV\n",VCC_PS_GTR,VCC_PS_GTR_avg);
+		fprintf(fp_out, "VTT PS GTR voltage    					:     %ld mV\t\t %ld mV\n\n",VTT_PS_GTR,VTT_PS_GTR_avg);
+
+		fprintf(fp_out, "PL Sysmon\n");
+		fprintf(fp_out, "PL temperature    					:     %ld C\t\t %ld C\n\n",(PL_TEMP)/1000,(PL_TEMP_avg)/1000);
+
+	}
+	else
+	{
+		fprintf(fp_out, "AMS CTRL\n");
+		fprintf(fp_out, "System PLLs voltage measurement, VCC_PSLL   		:     %ld mV\n",VCC_PSPLL);
+		fprintf(fp_out, "PL internal voltage measurement, VCC_PSBATT 		:     %ld mV\n",PL_VCCINT);
+		fprintf(fp_out, "Voltage measurement for six DDR I/O PLLs, VCC_PSDDR_PLL :     %ld mV\n",VOLT_DDRS);
+		fprintf(fp_out, "VCC_PSINTFP_DDR voltage measurement         		:     %ld mV\n\n",VCC_PSINTFP);
+
+		fprintf(fp_out, "PS Sysmon\n");
+		fprintf(fp_out, "LPD temperature measurement 		    		:     %ld C\n",(LPD_TEMP)/1000);
+		fprintf(fp_out, "FPD temperature measurement (REMOTE)  		    	:     %ld C\n",(FPD_TEMP)/1000);
+		fprintf(fp_out, "VCC PS FPD voltage measurement (supply 2)   		:     %ld mV\n",VCC_PS_FPD);
+		fprintf(fp_out, "PS IO Bank 500 voltage measurement (supply 6)		:     %ld mV\n",PS_IO_BANK_500);
+		fprintf(fp_out, "VCC PS GTR voltage   					:     %ld mV\n",VCC_PS_GTR);
+		fprintf(fp_out, "VTT PS GTR voltage    					:     %ld mV\n\n",VTT_PS_GTR);
+
+		fprintf(fp_out, "PL Sysmon\n");
+		fprintf(fp_out, "PL temperature    					:     %ld C\n\n",(PL_TEMP)/1000);
+	}
 
 	return(0);
 }
@@ -980,10 +1088,55 @@ int print_sysmon_power_info(int verbose_flag)
  * @note         None.
  *
  ******************************************************************************/
-int print_power_utilization(int verbose_flag, int rate, int duration)
+int print_power_utilization(int verbose_flag, int sample_interval, int sample_window)
 {
-	print_ina260_power_info(verbose_flag, rate, duration);
-	print_sysmon_power_info(verbose_flag);
+	int pos = 0;
+	int len = pos+1;
+
+	if(sample_interval > 0)
+	{
+		powerarr = (long*)calloc(sample_window,sizeof(long));
+		currarr = (long*)calloc(sample_window,sizeof(long));
+		volarr = (long*)calloc(sample_window,sizeof(long));
+
+		LPD_TEMP_arr = (long*)calloc(sample_window,sizeof(long));
+		FPD_TEMP_arr = (long*)calloc(sample_window,sizeof(long));
+		PL_TEMP_arr = (long*)calloc(sample_window,sizeof(long));
+		VCC_PSPLL_arr = (long*)calloc(sample_window,sizeof(long));
+		PL_VCCINT_arr = (long*)calloc(sample_window,sizeof(long));
+		VOLT_DDRS_arr = (long*)calloc(sample_window,sizeof(long));
+		VCC_PSINTFP_arr = (long*)calloc(sample_window,sizeof(long));
+		VCC_PS_FPD_arr = (long*)calloc(sample_window,sizeof(long));
+		PS_IO_BANK_500_arr = (long*)calloc(sample_window,sizeof(long));
+		VCC_PS_GTR_arr = (long*)calloc(sample_window,sizeof(long));
+		VTT_PS_GTR_arr = (long*)calloc(sample_window,sizeof(long));
+
+		signal(SIGINT, sigint_handler);
+		fprintf(fp_out, "Calculating moving average of last %d samples taken at %d second intervals.\nPress Ctrl+C to exit.\n",sample_window,sample_interval);
+
+		while(1)
+		{
+			print_ina260_power_info(verbose_flag, sample_interval, sample_window, pos, len);
+			print_sysmon_power_info(verbose_flag, sample_interval, sample_window, pos, len);
+
+			pos++;
+			if(pos >= sample_window){
+				pos = 0;
+			}
+
+			len++;
+			if(len > sample_window){
+				len = sample_window;
+			}
+
+			sleep(sample_interval);
+		}
+	}
+	else
+	{
+		print_ina260_power_info(verbose_flag, sample_interval, sample_window, pos, len);
+		print_sysmon_power_info(verbose_flag, sample_interval, sample_window, pos, len);
+	}
 
 	return(0);
 }
@@ -1002,7 +1155,7 @@ int print_power_utilization(int verbose_flag, int rate, int duration)
  * @note         None.
  *
  ******************************************************************************/
-void print_all_stats(int verbose_flag, int rate, int duration)
+void print_all_stats(int verbose_flag, int sample_interval, int sample_window)
 {
 
 	print_cpu_utilization(verbose_flag);
@@ -1011,7 +1164,7 @@ void print_all_stats(int verbose_flag, int rate, int duration)
 
 	print_swap_memory_utilization(verbose_flag);
 
-	print_power_utilization(verbose_flag,rate,duration);
+	print_power_utilization(verbose_flag,sample_interval,sample_window);
 
 	print_cma_utilization(verbose_flag);
 
@@ -1041,7 +1194,7 @@ int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP)
 
 	if(hwmon_id == -1)
 	{
-		printf("no hwmon device found for ams under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ams under /sys/class/hwmon\n");
 		return(0);
 	}
 
@@ -1081,7 +1234,7 @@ int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PS
 
 	if(hwmon_id == -1)
 	{
-		printf("no hwmon device found for ams under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ams under /sys/class/hwmon\n");
 		return(0);
 	}
 
@@ -1098,7 +1251,7 @@ int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PS
 
 	if(hwmon_id == -1)
         {
-                printf("no hwmon device found for ams under /sys/class/hwmon\n");
+                fprintf(fp_out, "no hwmon device found for ams under /sys/class/hwmon\n");
                 return(0);
         }
 
@@ -1128,7 +1281,7 @@ int get_current(long* total_current)
 
 	if(hwmon_id == -1)
 	{
-		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
 		return(0);
 	}
 
@@ -1158,7 +1311,7 @@ int get_power(long* total_power)
 
 	if(hwmon_id == -1)
 	{
-		printf("no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
 		return(0);
 	}
 

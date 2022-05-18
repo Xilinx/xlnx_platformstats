@@ -15,13 +15,12 @@ extern struct cpustat {
         double total_util;
 };
 
-extern void print_all_stats(int verbose_flag, int rate, int duration);
+extern void print_all_stats(int verbose_flag, int sample_interval, int sample_window);
 extern int print_cpu_utilization(int verbose_flag);
 extern int print_cpu_stats(struct cpustat *st, int cpu_id);
 extern int print_ram_memory_utilization(int verbose_flag);
 extern int print_swap_memory_utilization(int verbose_flag);
-extern int print_power_utilization(int verbose_flag, int rate, int duration);
-extern int print_ina260_power_info(int verbose_flag, int rate, int duration);
+extern int print_power_utilization(int verbose_flag, int sample_interval, int sample_window);
 extern int print_cma_utilization(int verbose_flag);
 extern int print_cpu_frequency(int verbose_flag);
 void init();
@@ -39,13 +38,12 @@ extern struct cpustat {
         double total_util;
 };
 
-extern void print_all_stats(int verbose_flag, int rate, int duration);
+extern void print_all_stats(int verbose_flag, int sample_interval, int sample_window);
 extern int print_cpu_utilization(int verbose_flag);
 extern int print_cpu_stats(struct cpustat *st, int cpu_id);
 extern int print_ram_memory_utilization(int verbose_flag);
 extern int print_swap_memory_utilization(int verbose_flag);
-extern int print_power_utilization(int verbose_flag, int rate, int duration);
-extern int print_ina260_power_info(int verbose_flag, int rate, int duration);
+extern int print_power_utilization(int verbose_flag, int sample_interval, int sample_window);
 extern int print_cma_utilization(int verbose_flag);
 extern int print_cpu_frequency(int verbose_flag);
 void init();
