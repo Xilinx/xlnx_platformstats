@@ -928,7 +928,7 @@ int print_ina260_power_info(int verbose_flag, int sample_interval, int sample_wi
 		fprintf(fp_out, "----------------------------------------------------------------------------------------\n");
 		time_t rawtime;
 		time(&rawtime);
-		fprintf(fp_out, "%d samples collected on %s\n", sample_window, ctime(&rawtime));
+		fprintf(fp_out, "%d samples averaged on %s\n", len, ctime(&rawtime));
 		fprintf(fp_out, "                                                           Instantaneous\t Average\n");
 		fprintf(fp_out, "Power Utilization\n");
 		fprintf(fp_out, "SOM total power                                         :     %ld mW\t\t %ld mW\n",(total_power)/1000, power_avg);
