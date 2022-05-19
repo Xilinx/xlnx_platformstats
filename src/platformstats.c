@@ -561,14 +561,29 @@ int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, 
 	else
 	{
 		char buff[80];
+		unsigned long temp;
+		int reads = 3;
 
-		fscanf(fp," %s %ld",buff,MemTotal);
-		skip_lines(fp,1);
-
-		fscanf(fp," %s %ld",buff,MemFree);
-		skip_lines(fp,1);
-
-		fscanf(fp, "%s %ld",buff,MemAvailable);
+		while(reads)
+		{
+			fscanf(fp," %s %ld",buff,&temp);
+			if(strcmp(buff,"MemTotal:") == 0)
+			{
+				*MemTotal = temp;
+				reads--;
+			}
+			if(strcmp(buff,"MemFree:") == 0)
+			{
+				*MemFree = temp;
+				reads--;
+			}
+			if(strcmp(buff,"MemAvailable:") == 0)
+			{
+				*MemAvailable = temp;
+				reads--;
+			}
+			skip_lines(fp,1);
+		}
 
 		fclose(fp);
 	}
@@ -643,12 +658,24 @@ int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree)
 	else
 	{
 		char buff[80];
+		unsigned long temp;
+		int reads = 2;
 
-		skip_lines(fp,41);
-		fscanf(fp," %s %ld",buff,CmaTotal);
-
-		skip_lines(fp,1);
-		fscanf(fp," %s %ld",buff,CmaFree);
+		while(reads)
+		{
+			fscanf(fp," %s %ld",buff,&temp);
+			if(strcmp(buff,"CmaTotal:") == 0)
+			{
+				*CmaTotal = temp;
+				reads--;
+			}
+			if(strcmp(buff,"CmaFree:") == 0)
+			{
+				*CmaFree = temp;
+				reads--;
+			}
+			skip_lines(fp,1);
+		}
 
 		fclose(fp);
 	}
@@ -718,12 +745,24 @@ int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFre
 	else
 	{
 		char buff[80];
+		unsigned long temp;
+		int reads = 2;
 
-		skip_lines(fp,14);
-		fscanf(fp," %s %ld",buff,SwapTotal);
-
-		skip_lines(fp,1);
-		fscanf(fp," %s %ld",buff,SwapFree);
+		while(reads)
+		{
+			fscanf(fp," %s %ld",buff,&temp);
+			if(strcmp(buff,"SwapTotal:") == 0)
+			{
+				*SwapTotal = temp;
+				reads--;
+			}
+			if(strcmp(buff,"SwapFree:") == 0)
+			{
+				*SwapFree = temp;
+				reads--;
+			}
+			skip_lines(fp,1);
+		}
 
 		fclose(fp);
 	}
