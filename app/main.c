@@ -38,7 +38,7 @@
 /************************** Variable Definitions *****************************/
 static int verbose_flag=0;
 char *filename;
-FILE *fp_out;
+extern FILE *fp_out;
 static int sample_interval=0;
 static int sample_window=1;
 char *temp;
