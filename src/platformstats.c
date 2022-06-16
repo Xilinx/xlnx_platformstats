@@ -20,7 +20,7 @@
 
 #define MAX_FILENAME_LEN 500
 
-extern FILE *fp_out;
+FILE *fp_out;
 
 struct cpustat* stat0;
 struct cpustat* stat1;
