@@ -19,22 +19,26 @@ The library provides following list of APIs
 Usage: platformstats [options] [stats]
 
  Options
-*    -i --interval	Specify the decimal value for polling in ms. The default is 1000ms.
 *    -v --verbose	Print verbose messages
 *    -l --logfile	Print output to logfile
-*    -s --stop		Stop any running instances of platformstats
 *    -h --help		Show this usuage.
 
  List of stats to print
 *    -a --all		Print all supported stats.
 *    -c --cpu-util	Print CPU Utilization.
-*    -r --ram-util	Print RAM Utilization.
-*    -s --swap-util	Print Swap Mem Utilization.
 *    -p --power-util	Print Power Utilization.
-*    -m --cma-util	Print CMA Mem Utilization.
+*    -m --mem-util	Print all Mem Utilization.
 *    -f --cpu-freq	Print CPU frequency.
 
-## Compile test app
+## Build Dependencies
+- Install swig
+	sudo apt install swig
+
+## Compile and install using top-level Makefile
+	sudo make install
+
+## Compile each component separately
+### Compile test app
 	cd app/
 	make clean
 	make
