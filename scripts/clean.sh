@@ -23,15 +23,15 @@
 # ******************************************************************************
 
 rm -rf include/
-rm platformstats
+rm xlnx_platformstats
 
 rm src/*.so*
 rm src/*.o
 
-rm app/platformstats
+rm app/xlnx_platformstats
 
 rm python-bindings/*.so*
-rm python-bindings/platformstats
+rm python-bindings/xlnx_platformstats
 rm python-bindings/*.c
 rm python-bindings/*.o
 rm python-bindings/*.py

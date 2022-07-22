@@ -25,6 +25,6 @@
 ./clean.sh
 ./build.sh
 export LD_LIBRARY_PATH=./src
-#./platformstats -vl test.txt
-./platformstats
+#./xlnx_platformstats -vl test.txt
+./xlnx_platformstats
 #./main

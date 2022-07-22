@@ -1,6 +1,6 @@
-/* File : platformstats.h */
+/* File : xlnx_platformstats.h */
 
-%module platformstats
+%module xlnx_platformstats
 %include "typemaps.i"
 
 %{

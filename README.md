@@ -1,4 +1,4 @@
-# Platformstats
+# xlnx_platformstats
 
 A library that provides APIs to print different platform statistics.
 
@@ -16,7 +16,7 @@ The library provides following list of APIs
 | CPU Frequency 	| List and print all active CPU frequency      	|
 
 ## Usage
-Usage: platformstats [options] [stats]
+Usage: xlnx_platformstats [options] [stats]
 
  Options
 *    -v --verbose	Print verbose messages
@@ -50,7 +50,7 @@ Usage: platformstats [options] [stats]
 	cd python-bindings
 	make
 ### Generate Documentation
-	doxygen docs/platformstats_doxygen_config
+	doxygen docs/xlnx_platformstats_doxygen_config
 HTML docs are populated in tmp/html
 
 PDF doc will be available at tmp/latex/refman.pdf

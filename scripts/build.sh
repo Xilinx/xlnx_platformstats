@@ -27,10 +27,10 @@ make clean
 make
 
 cd ../app/
-rm -rf ../platformstats
+rm -rf ../xlnx_platformstats
 make clean
 make
-cp platformstats ../
+cp xlnx_platformstats ../
 
-cp platformstats ../python-bindings/
+cp xlnx_platformstats ../python-bindings/
 

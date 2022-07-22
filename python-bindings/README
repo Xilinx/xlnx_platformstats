@@ -1,28 +1,28 @@
 Usage Examples:
 
-import platformstats
+import xlnx_platformstats
 
-platformstats.init()				//Init function to allocate memory (call at start before other functions)
-platformstats.deinit()				//Deinit function to free memory (call at the end)
+xlnx_platformstats.init()				//Init function to allocate memory (call at start before other functions)
+xlnx_platformstats.deinit()				//Deinit function to free memory (call at the end)
 
-platformstats.print_all_stats(0) //0 for no verbose prints, 1 for verbose prints
-platformstats.print_cpu_utilization(0)
-platformstats.print_power_utilization(0)
-platformstats.print_cma_utilization(0)
-platformstats.print_swap_memory_utilization(0)
-platformstats.print_ram_memory_utilization(0)
+xlnx_platformstats.print_all_stats(0) //0 for no verbose prints, 1 for verbose prints
+xlnx_platformstats.print_cpu_utilization(0)
+xlnx_platformstats.print_power_utilization(0)
+xlnx_platformstats.print_cma_utilization(0)
+xlnx_platformstats.print_swap_memory_utilization(0)
+xlnx_platformstats.print_ram_memory_utilization(0)
 
-platformstats.get_ram_memory_utilization() 	//Returns list [return_val, MemTotal, MemFree, MemAvailable]
-platformstats.get_swap_memory_utilization()	//Returns list [return_val, SwapTotal, SwapFree]
-platformstats.get_cma_utilization()		//Returns list [return_val, CmaTotal, CmaFree]
-platformstats.get_cpu_frequency(0) 		//Returns list [return_val, cpu_freq]
+xlnx_platformstats.get_ram_memory_utilization() 	//Returns list [return_val, MemTotal, MemFree, MemAvailable]
+xlnx_platformstats.get_swap_memory_utilization()	//Returns list [return_val, SwapTotal, SwapFree]
+xlnx_platformstats.get_cma_utilization()		//Returns list [return_val, CmaTotal, CmaFree]
+xlnx_platformstats.get_cpu_frequency(0) 		//Returns list [return_val, cpu_freq]
 
-platformstats.get_temperatures()		//Returns list [return_val, LPD_TEMP, FPD_TEMP, PL_TEMP]
-platformstats.get_voltages()			//Returns list [return_val, VCC_PSPLL, PL_VCCINT, VOLT_DDRS, VCC_PSINTFP, VCC_PS_FPD, PS_IO_BANK_500, VCC_PS_GTR, VTT_PS_GTR, total_voltage]
-platformstats.get_current()			//Returns list [return_val, total_current]
-platformstats.get_power()			//Returns list [return_val, total_power]
+xlnx_platformstats.get_temperatures()		//Returns list [return_val, LPD_TEMP, FPD_TEMP, PL_TEMP]
+xlnx_platformstats.get_voltages()			//Returns list [return_val, VCC_PSPLL, PL_VCCINT, VOLT_DDRS, VCC_PSINTFP, VCC_PS_FPD, PS_IO_BANK_500, VCC_PS_GTR, VTT_PS_GTR, total_voltage]
+xlnx_platformstats.get_current()			//Returns list [return_val, total_current]
+xlnx_platformstats.get_power()			//Returns list [return_val, total_power]
 
-platformstats.get_cpu_utilization()		//Returns list of cpu utilization for each cpu
+xlnx_platformstats.get_cpu_utilization()		//Returns list of cpu utilization for each cpu
 
 ##############
 #To use print_cpu_frequency API need to run python as sudo##
@@ -30,5 +30,5 @@ platformstats.get_cpu_utilization()		//Returns list of cpu utilization for each 
 #using os.environ['LD_LIBRARY_PATH'] wont work as expected
 #############
 
-sudo env LD_LIBRARY_PATH=<path to libplatformstats.so.1> python3
-platformstats.print_cpu_frequency(0)
+sudo env LD_LIBRARY_PATH=<path to libxlnx_platformstats.so.1> python3
+xlnx_platformstats.print_cpu_frequency(0)

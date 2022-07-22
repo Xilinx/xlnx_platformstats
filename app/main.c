@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <time.h>
-#include <platformstats.h>
+#include <xlnx_platformstats.h>
 
 
 #define SLEEP_MIN_TIME 1
@@ -50,7 +50,7 @@ int i=0;
 /*****************************************************************************/
 /**
  *
- * This function prints command usage for platformstats utility.
+ * This function prints command usage for xlnx_platformstats utility.
  *
  * @param    None
  *
@@ -62,14 +62,14 @@ int i=0;
 static void print_usage()
 {
 	printf(" XILINX PLATFORM STATS UTILITY \n");
-	printf(" Usage: platformstats [options] [stats]\n\n");
+	printf(" Usage: xlnx_platformstats [options] [stats]\n\n");
 	printf(" Options \n");
 	printf("	-h --help		Show this usuage.\n\n");
 	printf("	can combine multiple options at the same time.\n\n");
-	printf("	Example: platformstats -va \n\n");
-	printf("	         platformstats -v -a \n\n");
-	printf("	         platformstats -l \"log.txt\" -p\"1 10\" \n\n");
-	printf("	         platformstats -p\"1 10\" \n\n");
+	printf("	Example: xlnx_platformstats -va \n\n");
+	printf("	         xlnx_platformstats -v -a \n\n");
+	printf("	         xlnx_platformstats -l \"log.txt\" -p\"1 10\" \n\n");
+	printf("	         xlnx_platformstats -p\"1 10\" \n\n");
 	printf(" List of stats to print\n");
 	printf("	-a --all		Print all supported stats.\n");
 	printf("	-c --cpu-util		Print CPU Utilization.\n");

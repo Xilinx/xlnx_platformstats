@@ -15,7 +15,7 @@
 #include <sys/sysinfo.h>
 #include <time.h>
 
-#include "platformstats.h"
+#include "xlnx_platformstats.h"
 #include "utils.h"
 
 #define MAX_FILENAME_LEN 500
