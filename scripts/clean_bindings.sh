@@ -3,5 +3,5 @@ rm *.o
 rm *.so
 rm *.c
 rm *.py
-rm platformstats
+rm xlnx_platformstats
 

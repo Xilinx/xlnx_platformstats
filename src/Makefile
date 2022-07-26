@@ -16,12 +16,12 @@ INCLUDEDIR = ../include
 MAJOR = 1
 MINOR = 0
 VERSION = $(MAJOR).$(MINOR)
-NAME := platformstats
+NAME := xlnx_platformstats
 
 all: include lib$(NAME).so
 
 install: all
-	$(INSTALL_PROGRAM) -D -m 644 platformstats.h  $(DESTDIR)$(includedir)/platformstats.h
+	$(INSTALL_PROGRAM) -D -m 644 xlnx_platformstats.h  $(DESTDIR)$(includedir)/xlnx_platformstats.h
 	$(INSTALL_PROGRAM) -D -m 644 lib$(NAME).so.$(VERSION) $(DESTDIR)$(libdir)/lib$(NAME).so.$(VERSION)
 	$(CP) -d lib$(NAME).so.$(MAJOR) lib$(NAME).so $(DESTDIR)$(libdir)/
 
@@ -30,8 +30,8 @@ clean:
 	rm -rf $(INCLUDEDIR)
 
 include:
-	mkdir $(INCLUDEDIR)/platformstats -p
-	$(CP) $(HEADERS) $(INCLUDEDIR)/platformstats
+	mkdir $(INCLUDEDIR)/xlnx_platformstats -p
+	$(CP) $(HEADERS) $(INCLUDEDIR)/xlnx_platformstats
 
 lib$(NAME).so.$(VERSION): $(OBJECTS)
 	$(CC) $(LDFLAGS) $^ -Wl,-soname,lib$(NAME).so.$(MAJOR) -o lib$(NAME).so.$(VERSION)
@@ -42,4 +42,4 @@ lib$(NAME).so: lib$(NAME).so.$(VERSION)
 	ln -s lib$(NAME).so.$(MAJOR) lib$(NAME).so
 
 %.o: %.c include
-	$(CC) $(CFLAGS) -I$(INCLUDEDIR) -I$(INCLUDEDIR)/platformstats -c -fPIC $< -o $@
+	$(CC) $(CFLAGS) -I$(INCLUDEDIR) -I$(INCLUDEDIR)/xlnx_platformstats -c -fPIC $< -o $@
