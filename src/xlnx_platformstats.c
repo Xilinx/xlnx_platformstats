@@ -485,7 +485,7 @@ static int read_char_sysfs_entry(char* base_filename, char* filepath, int id, ch
 int get_cpu_frequency(int cpu_id, float* cpu_freq)
 {
 	char base_filename[MAX_FILENAME_LEN] = "/sys/devices/system/cpu/cpu";
-	char filepath[MAX_FILENAME_LEN] = "/cpufreq/cpuinfo_cur_freq";
+	char filepath[MAX_FILENAME_LEN] = "/cpufreq/scaling_cur_freq";
 
      	read_float_sysfs_entry(base_filename,filepath,cpu_id,cpu_freq);
 
