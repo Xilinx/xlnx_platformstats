@@ -35,7 +35,7 @@ int print_power_utilization(int verbose_flag, int sample_interval, int sample_wi
 int print_ina260_power_info(int verbose_flag, int sample_interval, int sample_window, int pos, int len);
 int print_sysmon_power_info(int verbose_flag, int sample_interval, int sample_window, int pos, int len);
 int count_hwmon_reg_devices();
-int get_device_hwmon_id(int verbose_flag, char* name);
+int get_device_hwmon_id(int verbose_flag, char* name, size_t len);
 
 int print_cma_utilization(int verbose_flag);
 int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree);

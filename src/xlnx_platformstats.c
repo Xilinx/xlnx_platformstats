@@ -854,7 +854,7 @@ int count_hwmon_reg_devices()
  * @note         None.
  *
  ******************************************************************************/
-int get_device_hwmon_id(int verbose_flag, char* name)
+int get_device_hwmon_id(int verbose_flag, char* name, size_t len)
 {
 	//find number of hwmon devices listed under
 	int num_hwmon_devices,hwmon_id;
@@ -870,7 +870,7 @@ int get_device_hwmon_id(int verbose_flag, char* name)
 	{
 		read_char_sysfs_entry(base_filename,"/name", hwmon_id, device_name);
 
-		if(!strcmp(name,device_name))
+		if(!strncmp(name,device_name,len))
 		{
 			return(hwmon_id);
 		}
@@ -933,11 +933,11 @@ int print_ina260_power_info(int verbose_flag, int sample_interval, int sample_wi
 	long total_power, total_current, total_voltage;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
 
-	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260_u14");
+	hwmon_id = get_device_hwmon_id(verbose_flag,"ina260",6);
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
 		return(0);
 	}
 
@@ -1008,7 +1008,7 @@ int print_sysmon_power_info(int verbose_flag, int sample_interval, int sample_wi
 
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
 
-	hwmon_id = get_device_hwmon_id(verbose_flag,"ams");
+	hwmon_id = get_device_hwmon_id(verbose_flag,"ams",3);
 
 	if(hwmon_id == -1)
 	{
@@ -1229,7 +1229,7 @@ int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP)
 	int hwmon_id;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
 
-	hwmon_id = get_device_hwmon_id(0,"ams");
+	hwmon_id = get_device_hwmon_id(0,"ams",3);
 
 	if(hwmon_id == -1)
 	{
@@ -1269,7 +1269,7 @@ int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PS
 	int hwmon_id;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
 
-	hwmon_id = get_device_hwmon_id(0,"ams");
+	hwmon_id = get_device_hwmon_id(0,"ams",3);
 
 	if(hwmon_id == -1)
 	{
@@ -1286,11 +1286,11 @@ int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PS
 	read_int_sysfs_entry(base_filename,"/in16_input", hwmon_id, VCC_PS_GTR);
 	read_int_sysfs_entry(base_filename,"/in17_input", hwmon_id, VTT_PS_GTR);
 
-	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+	hwmon_id = get_device_hwmon_id(0,"ina260",6);
 
 	if(hwmon_id == -1)
         {
-                fprintf(fp_out, "no hwmon device found for ams under /sys/class/hwmon\n");
+                fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
                 return(0);
         }
 
@@ -1316,11 +1316,11 @@ int get_current(long* total_current)
 	int hwmon_id;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
 
-	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+	hwmon_id = get_device_hwmon_id(0,"ina260",6);
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
 		return(0);
 	}
 
@@ -1346,11 +1346,11 @@ int get_power(long* total_power)
 	int hwmon_id;
 	char base_filename[MAX_FILENAME_LEN] = "/sys/class/hwmon/hwmon";
 
-	hwmon_id = get_device_hwmon_id(0,"ina260_u14");
+	hwmon_id = get_device_hwmon_id(0,"ina260",6);
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260_u14 under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
 		return(0);
 	}
 
