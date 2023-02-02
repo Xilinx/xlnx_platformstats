@@ -14,7 +14,7 @@ HEADERS = $(shell echo *.h)
 OBJECTS = $(SOURCES:.c=.o)
 INCLUDEDIR = ../include
 MAJOR = 1
-MINOR = 0
+MINOR = 1
 VERSION = $(MAJOR).$(MINOR)
 NAME := xlnx_platformstats
 
