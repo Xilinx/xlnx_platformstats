@@ -175,6 +175,8 @@ void init()
 
 	util_arr = malloc(num_cpus * sizeof (double));
 
+	fp_out = stdout;
+
 	return;
 }
 
@@ -237,7 +239,7 @@ double* get_cpu_utilization(size_t *len)
 /*****************************************************************************/
 /*
  *
- * This API prints CPU stats stored in given structure for particular CPU id 
+ * This API prints CPU stats stored in given structure for particular CPU id
  *
  * @param	cpu_stat: struct that stores CPU stats
  * @param	cpu_id: CPU id for which the details must be caputred.
@@ -249,7 +251,7 @@ double* get_cpu_utilization(size_t *len)
  ******************************************************************************/
 int print_cpu_stats(struct cpustat *st, int cpu_id)
 {
-	fprintf(fp_out, "CPU%d: %ld %ld %ld %ld %ld %ld %ld\n", cpu_id, (st->user), (st->nice), 
+	fprintf(fp_out, "CPU%d: %ld %ld %ld %ld %ld %ld %ld\n", cpu_id, (st->user), (st->nice),
 			(st->system), (st->idle), (st->iowait), (st->irq),
 			(st->softirq));
 
@@ -260,7 +262,7 @@ int print_cpu_stats(struct cpustat *st, int cpu_id)
 /*
  *
  * This API calculates CPU util in real time, by computing delta at two time instances.
- * By default the interval between two time instances is 1s if not specified. 
+ * By default the interval between two time instances is 1s if not specified.
  *
  * @param	prev: CPU stats at T0
  * @param	curr: CPU stats at T1
@@ -274,7 +276,7 @@ double calculate_load(struct cpustat *prev, struct cpustat *curr)
 {
 	unsigned long idle_prev, idle_curr, nidle_prev, nidle_curr;
 	unsigned long total_prev, total_curr;
-	double total_delta, idle_delta, cpu_util; 
+	double total_delta, idle_delta, cpu_util;
 
 	idle_prev=(prev->idle)+(prev->iowait);
 	idle_curr=(curr->idle)+(curr->iowait);
@@ -720,7 +722,7 @@ int print_cma_utilization(int verbose_flag)
  *
  * This API scans the following information about physical swap memory:
  * SwapTotal: Total usable physical swap memory
- * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
+ * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM,
  * and is temporarily on the disk.
  *
  * @param        SwapTotal: Total usable physical swap size
@@ -776,7 +778,7 @@ int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFre
  *
  * This API prints the following information about swap memory:
  * SwapTotal: Total usable physical swap memory
- * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
+ * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM,
  * and is temporarily on the disk.
  *
  * @param        verbose_flag: Enable verbose prints
