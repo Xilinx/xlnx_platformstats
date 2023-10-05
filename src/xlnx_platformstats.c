@@ -42,6 +42,9 @@ long* PS_IO_BANK_500_arr;
 long* VCC_PS_GTR_arr;
 long* VTT_PS_GTR_arr;
 
+fruDataType cc_fru_data;
+const char *cc_fru_file_pattern = "/sys/devices/platform/axi/*.i2c/*/*51/eeprom";
+
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
 /*
@@ -177,6 +180,9 @@ void init()
 
 	fp_out = stdout;
 
+	fru_init();
+	fru_read_file(cc_fru_file_pattern, &cc_fru_data);
+
 	return;
 }
 
@@ -198,6 +204,8 @@ void deinit()
 	free(stat0);
 	free(stat1);
 	free(util_arr);
+
+	fru_deinit();
 
 	return;
 }
@@ -911,6 +919,8 @@ void sigint_handler(int sig_num)
 	free(VCC_PS_GTR_arr);
 	free(VTT_PS_GTR_arr);
 
+	fru_deinit();
+
 	exit(0);
 }
 
@@ -939,7 +949,13 @@ int print_ina260_power_info(int verbose_flag, int sample_interval, int sample_wi
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+		int kria_cc = 0;
+		kria_cc = is_kria_cc(&cc_fru_data);
+		if(kria_cc == 1)
+		{
+			fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n\n");
+			return(1);
+		}
 		return(0);
 	}
 
@@ -1291,10 +1307,16 @@ int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PS
 	hwmon_id = get_device_hwmon_id(0,"ina260",6);
 
 	if(hwmon_id == -1)
-        {
-                fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
-                return(0);
-        }
+	{
+		int kria_cc = 0;
+		kria_cc = is_kria_cc(&cc_fru_data);
+		if(kria_cc == 1)
+		{
+			fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+			return(1);
+		}
+		return(0);
+	}
 
 	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, total_voltage);
 
@@ -1322,7 +1344,13 @@ int get_current(long* total_current)
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+		int kria_cc = 0;
+		kria_cc = is_kria_cc(&cc_fru_data);
+		if(kria_cc == 1)
+		{
+			fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+			return(1);
+		}
 		return(0);
 	}
 
@@ -1352,11 +1380,28 @@ int get_power(long* total_power)
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+		int kria_cc = 0;
+		kria_cc = is_kria_cc(&cc_fru_data);
+		if(kria_cc == 1)
+		{
+			fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+			return(1);
+		}
 		return(0);
 	}
 
 	read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, total_power);
 
 	return(0);
+}
+
+void xlnx_platformstats_app_init()
+{
+	fru_init();
+	fru_read_file(cc_fru_file_pattern, &cc_fru_data);
+}
+
+void xlnx_platformstats_app_deinit()
+{
+	fru_deinit();
 }

@@ -86,6 +86,7 @@ static void print_usage()
 
 int main(int argc, char *argv[])
 {
+	xlnx_platformstats_app_init();
 	fp_out = stdout;
 	int opt,options_index = 0;
 	static struct option long_options[] =
@@ -190,6 +191,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	xlnx_platformstats_app_deinit();
+
 	return(0);
 }
-
