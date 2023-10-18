@@ -47,3 +47,6 @@ int get_temperatures(long* LPD_TEMP, long* FPD_TEMP, long* PL_TEMP);
 int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PSINTFP, long* VCC_PS_FPD, long* PS_IO_BANK_500, long* VCC_PS_GTR, long* VTT_PS_GTR, long* total_voltage);
 int get_current(long* total_current);
 int get_power(long* total_power);
+
+void xlnx_platformstats_app_init();
+void xlnx_platformstats_app_deinit();

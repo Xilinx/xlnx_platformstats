@@ -31,8 +31,8 @@ Usage: xlnx_platformstats [options] [stats]
 *    -f --cpu-freq	Print CPU frequency.
 
 ## Build Dependencies
-- Install swig
-	sudo apt install swig
+- Install build dependencies
+	sudo apt install swig libfreeipmi-dev
 
 ## Compile and install using top-level Makefile
 	sudo make install

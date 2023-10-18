@@ -34,7 +34,7 @@ include:
 	$(CP) $(HEADERS) $(INCLUDEDIR)/xlnx_platformstats
 
 lib$(NAME).so.$(VERSION): $(OBJECTS)
-	$(CC) $(LDFLAGS) $^ -Wl,-soname,lib$(NAME).so.$(MAJOR) -o lib$(NAME).so.$(VERSION)
+	$(CC) $(LDFLAGS) $^ -Wl,-soname,lib$(NAME).so.$(MAJOR) -o lib$(NAME).so.$(VERSION) -lfreeipmi
 
 lib$(NAME).so: lib$(NAME).so.$(VERSION)
 	rm -f lib$(NAME).so.$(MAJOR) lib$(NAME).so

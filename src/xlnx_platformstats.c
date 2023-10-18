@@ -42,6 +42,9 @@ long* PS_IO_BANK_500_arr;
 long* VCC_PS_GTR_arr;
 long* VTT_PS_GTR_arr;
 
+fruDataType cc_fru_data;
+const char *cc_fru_file_pattern = "/sys/devices/platform/axi/*.i2c/*/*51/eeprom";
+
 /************************** Function Definitions *****************************/
 /*****************************************************************************/
 /*
@@ -175,6 +178,11 @@ void init()
 
 	util_arr = malloc(num_cpus * sizeof (double));
 
+	fp_out = stdout;
+
+	fru_init();
+	fru_read_file(cc_fru_file_pattern, &cc_fru_data);
+
 	return;
 }
 
@@ -196,6 +204,8 @@ void deinit()
 	free(stat0);
 	free(stat1);
 	free(util_arr);
+
+	fru_deinit();
 
 	return;
 }
@@ -237,7 +247,7 @@ double* get_cpu_utilization(size_t *len)
 /*****************************************************************************/
 /*
  *
- * This API prints CPU stats stored in given structure for particular CPU id 
+ * This API prints CPU stats stored in given structure for particular CPU id
  *
  * @param	cpu_stat: struct that stores CPU stats
  * @param	cpu_id: CPU id for which the details must be caputred.
@@ -249,7 +259,7 @@ double* get_cpu_utilization(size_t *len)
  ******************************************************************************/
 int print_cpu_stats(struct cpustat *st, int cpu_id)
 {
-	fprintf(fp_out, "CPU%d: %ld %ld %ld %ld %ld %ld %ld\n", cpu_id, (st->user), (st->nice), 
+	fprintf(fp_out, "CPU%d: %ld %ld %ld %ld %ld %ld %ld\n", cpu_id, (st->user), (st->nice),
 			(st->system), (st->idle), (st->iowait), (st->irq),
 			(st->softirq));
 
@@ -260,7 +270,7 @@ int print_cpu_stats(struct cpustat *st, int cpu_id)
 /*
  *
  * This API calculates CPU util in real time, by computing delta at two time instances.
- * By default the interval between two time instances is 1s if not specified. 
+ * By default the interval between two time instances is 1s if not specified.
  *
  * @param	prev: CPU stats at T0
  * @param	curr: CPU stats at T1
@@ -274,7 +284,7 @@ double calculate_load(struct cpustat *prev, struct cpustat *curr)
 {
 	unsigned long idle_prev, idle_curr, nidle_prev, nidle_curr;
 	unsigned long total_prev, total_curr;
-	double total_delta, idle_delta, cpu_util; 
+	double total_delta, idle_delta, cpu_util;
 
 	idle_prev=(prev->idle)+(prev->iowait);
 	idle_curr=(curr->idle)+(curr->iowait);
@@ -720,7 +730,7 @@ int print_cma_utilization(int verbose_flag)
  *
  * This API scans the following information about physical swap memory:
  * SwapTotal: Total usable physical swap memory
- * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
+ * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM,
  * and is temporarily on the disk.
  *
  * @param        SwapTotal: Total usable physical swap size
@@ -776,7 +786,7 @@ int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFre
  *
  * This API prints the following information about swap memory:
  * SwapTotal: Total usable physical swap memory
- * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM, 
+ * SwapFree: The amount of swap memory free. Memory which has been evicted from RAM,
  * and is temporarily on the disk.
  *
  * @param        verbose_flag: Enable verbose prints
@@ -909,6 +919,8 @@ void sigint_handler(int sig_num)
 	free(VCC_PS_GTR_arr);
 	free(VTT_PS_GTR_arr);
 
+	fru_deinit();
+
 	exit(0);
 }
 
@@ -937,7 +949,13 @@ int print_ina260_power_info(int verbose_flag, int sample_interval, int sample_wi
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+		int kria_cc = 0;
+		kria_cc = is_kria_cc(&cc_fru_data);
+		if(kria_cc == 1)
+		{
+			fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n\n");
+			return(1);
+		}
 		return(0);
 	}
 
@@ -1289,10 +1307,16 @@ int get_voltages(long* VCC_PSPLL, long* PL_VCCINT, long* VOLT_DDRS, long* VCC_PS
 	hwmon_id = get_device_hwmon_id(0,"ina260",6);
 
 	if(hwmon_id == -1)
-        {
-                fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
-                return(0);
-        }
+	{
+		int kria_cc = 0;
+		kria_cc = is_kria_cc(&cc_fru_data);
+		if(kria_cc == 1)
+		{
+			fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+			return(1);
+		}
+		return(0);
+	}
 
 	read_int_sysfs_entry(base_filename,"/in1_input", hwmon_id, total_voltage);
 
@@ -1320,7 +1344,13 @@ int get_current(long* total_current)
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+		int kria_cc = 0;
+		kria_cc = is_kria_cc(&cc_fru_data);
+		if(kria_cc == 1)
+		{
+			fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+			return(1);
+		}
 		return(0);
 	}
 
@@ -1350,11 +1380,28 @@ int get_power(long* total_power)
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+		int kria_cc = 0;
+		kria_cc = is_kria_cc(&cc_fru_data);
+		if(kria_cc == 1)
+		{
+			fprintf(fp_out, "no hwmon device found for ina260 under /sys/class/hwmon\n");
+			return(1);
+		}
 		return(0);
 	}
 
 	read_int_sysfs_entry(base_filename,"/power1_input", hwmon_id, total_power);
 
 	return(0);
+}
+
+void xlnx_platformstats_app_init()
+{
+	fru_init();
+	fru_read_file(cc_fru_file_pattern, &cc_fru_data);
+}
+
+void xlnx_platformstats_app_deinit()
+{
+	fru_deinit();
 }
