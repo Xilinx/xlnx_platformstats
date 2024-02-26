@@ -87,10 +87,13 @@ int get_stats(struct cpustat *cpu_stat, int cpu_id)
 		lskip = cpu_id+1;
 		skip_lines(fp, lskip);
 
-		fscanf(fp,"%s %ld %ld %ld %ld %ld %ld %ld", cpun,
-				&(cpu_stat->user), &(cpu_stat->nice), &(cpu_stat->system),
-				&(cpu_stat->idle), &(cpu_stat->iowait), &(cpu_stat->irq),
-				&(cpu_stat->softirq));
+		if(fscanf(fp,"%s %ld %ld %ld %ld %ld %ld %ld", cpun,
+			&(cpu_stat->user), &(cpu_stat->nice), &(cpu_stat->system),
+			&(cpu_stat->idle), &(cpu_stat->iowait), &(cpu_stat->irq),
+			&(cpu_stat->softirq)) != 8)
+		{
+			fprintf(fp_out, "Failed to read CPU stats\n");
+		}
 
 		fclose(fp);
 	}
@@ -138,13 +141,16 @@ int get_cpu_stats(struct cpustat *cpu_stat)
                 char cpun[255];
                 for(; cpu_id < num_cpus; cpu_id++)
                 {
-                        fscanf(fp,"%s %ld %ld %ld %ld %ld %ld %ld", cpun,
-                                &(cpu_stat[cpu_id].user), &(cpu_stat[cpu_id].nice),
-                                &(cpu_stat[cpu_id].system), &(cpu_stat[cpu_id].idle),
-                                &(cpu_stat[cpu_id].iowait), &(cpu_stat[cpu_id].irq),
-                                &(cpu_stat[cpu_id].softirq));
+			if(fscanf(fp,"%s %ld %ld %ld %ld %ld %ld %ld", cpun,
+				&(cpu_stat[cpu_id].user), &(cpu_stat[cpu_id].nice),
+				&(cpu_stat[cpu_id].system), &(cpu_stat[cpu_id].idle),
+				&(cpu_stat[cpu_id].iowait), &(cpu_stat[cpu_id].irq),
+				&(cpu_stat[cpu_id].softirq)) != 8)
+			{
+				fprintf(fp_out, "Failed to read CPU stats\n");
+			}
 
-                        skip_lines(fp, 1);
+			skip_lines(fp, 1);
 
 		}
                 fclose(fp);
@@ -401,7 +407,10 @@ static void read_int_sysfs_entry(char* base_filename, char* filepath, int id, lo
 		exit(0);
 	}
 
-	fscanf(fp,"%ld",val);
+	if(fscanf(fp,"%ld",val) != 1)
+	{
+		fprintf(fp_out, "Failed to read sysfs entry\n");
+	}
 	fclose(fp);
 
 }
@@ -434,7 +443,10 @@ static void read_float_sysfs_entry(char* base_filename, char* filepath, int id, 
 		exit(0);
 	}
 
-	fscanf(fp,"%f",val);
+	if(fscanf(fp,"%f",val) != 1)
+	{
+		fprintf(fp_out, "Failed to read sysfs entry\n");
+	}
 	fclose(fp);
 
 }
@@ -470,7 +482,10 @@ static int read_char_sysfs_entry(char* base_filename, char* filepath, int id, ch
 		exit(0);
 	}
 
-	fscanf(fp,"%s",value);
+	if(fscanf(fp,"%s",value) != 1)
+	{
+                fprintf(fp_out, "Failed to read sysfs entry\n");
+	}
 	fclose(fp);
 
 	return(0);
@@ -576,7 +591,10 @@ int get_ram_memory_utilization(unsigned long* MemTotal, unsigned long* MemFree, 
 
 		while(reads)
 		{
-			fscanf(fp," %s %ld",buff,&temp);
+			if(fscanf(fp," %s %ld",buff,&temp) != 2)
+			{
+				fprintf(fp_out, "Failed to read RAM info\n");
+			}
 			if(strcmp(buff,"MemTotal:") == 0)
 			{
 				*MemTotal = temp;
@@ -673,7 +691,10 @@ int get_cma_utilization(unsigned long* CmaTotal, unsigned long* CmaFree)
 
 		while(reads)
 		{
-			fscanf(fp," %s %ld",buff,&temp);
+			if(fscanf(fp," %s %ld",buff,&temp) != 2)
+			{
+				fprintf(fp_out, "Failed to read CMA info\n");
+			}
 			if(strcmp(buff,"CmaTotal:") == 0)
 			{
 				*CmaTotal = temp;
@@ -760,7 +781,10 @@ int get_swap_memory_utilization(unsigned long* SwapTotal, unsigned long* SwapFre
 
 		while(reads)
 		{
-			fscanf(fp," %s %ld",buff,&temp);
+			if(fscanf(fp," %s %ld",buff,&temp) != 2)
+			{
+				fprintf(fp_out, "Failed to read swap memory info\n");
+			}
 			if(strcmp(buff,"SwapTotal:") == 0)
 			{
 				*SwapTotal = temp;
@@ -980,7 +1004,10 @@ int print_ina260_power_info(int verbose_flag, int sample_interval, int sample_wi
 
 		if(fp_out == stdout)
 		{
-			system("clear");
+			if (system("clear") == -1)
+			{
+				fprintf(fp_out, "Failed to clear screen\n");
+			}
 		}
 		fprintf(fp_out, "----------------------------------------------------------------------------------------\n");
 		time_t rawtime;
