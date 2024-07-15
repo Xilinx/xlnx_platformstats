@@ -1135,7 +1135,12 @@ int print_sysmon_power_info(int verbose_flag, int sample_interval, int sample_wi
 		fprintf(fp_out, "VTT PS GTR voltage    					:     %ld mV\t\t %ld mV\n\n",VTT_PS_GTR,VTT_PS_GTR_avg);
 
 		fprintf(fp_out, "PL Sysmon\n");
-		fprintf(fp_out, "PL temperature    					:     %ld C\t\t %ld C\n\n",(PL_TEMP)/1000,(PL_TEMP_avg)/1000);
+		if (PL_TEMP_avg > 0) {
+			fprintf(fp_out, "PL temperature    					:     %ld C\t\t %ld C\n\n",(PL_TEMP)/1000,(PL_TEMP_avg)/1000);
+		}
+		else {
+			fprintf(fp_out, "PL Sysmon not available\n\n");
+                }
 
 	}
 	else
@@ -1155,7 +1160,12 @@ int print_sysmon_power_info(int verbose_flag, int sample_interval, int sample_wi
 		fprintf(fp_out, "VTT PS GTR voltage    					:     %ld mV\n\n",VTT_PS_GTR);
 
 		fprintf(fp_out, "PL Sysmon\n");
-		fprintf(fp_out, "PL temperature    					:     %ld C\n\n",(PL_TEMP)/1000);
+		if (PL_TEMP > 0) {
+			fprintf(fp_out, "PL temperature    					:     %ld C\n\n",(PL_TEMP)/1000);
+		}
+		else {
+			fprintf(fp_out, "PL Sysmon not available\n\n");
+		}
 	}
 
 	return(0);
