@@ -30,9 +30,8 @@ Usage: xlnx_platformstats [options] [stats]
 *    -m --mem-util	Print all Mem Utilization.
 *    -f --cpu-freq	Print CPU frequency.
 
-## Build Dependencies
-- Install build dependencies
-	sudo apt install swig libfreeipmi-dev
+## Install Build Dependencies
+	sudo apt install python3-dev build-essential make swig libfreeipmi-dev
 
 ## Compile and install using top-level Makefile
 	sudo make install
