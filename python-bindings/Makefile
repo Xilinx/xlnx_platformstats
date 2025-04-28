@@ -12,7 +12,8 @@ incdir ?= /usr/include
 libdir ?= /usr/lib
 
 #Python
-PYTHON_BASEVERSION ?= 3.10
+PYVER := $(subst ., ,$(shell python3 --version 2>&1))
+PYTHON_BASEVERSION ?= $(word 2,${PYVER}).$(word 3,${PYVER})
 PYTHON_DIR ?= python${PYTHON_BASEVERSION}
 PYTHON_INCLUDE_DIR ?= ${incdir}/$(PYTHON_DIR)
 PYTHON_SITEPACKAGES_DIR ?= ${libdir}/$(PYTHON_DIR)
