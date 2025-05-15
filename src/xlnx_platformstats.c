@@ -404,8 +404,8 @@ static void read_int_sysfs_entry(char* base_filename, char* filepath, int id, lo
 	fp = fopen(filename, "r");
 	if(fp == NULL)
 	{
-		fprintf(fp_out, " File open returned with error : %s\n", strerror(errno));
-		exit(0);
+		fprintf(fp_out, "Failed to open %s\n", filename);
+		return;
 	}
 
 	if(fscanf(fp,"%ld",val) != 1)
@@ -440,8 +440,8 @@ static void read_float_sysfs_entry(char* base_filename, char* filepath, int id, 
 	fp = fopen(filename, "r");
 	if(fp == NULL)
 	{
-		fprintf(fp_out, " File open returned with error : %s\n", strerror(errno));
-		exit(0);
+		fprintf(fp_out, "Failed to open %s\n", filename);
+		return;
 	}
 
 	if(fscanf(fp,"%f",val) != 1)
@@ -465,7 +465,7 @@ static void read_float_sysfs_entry(char* base_filename, char* filepath, int id, 
  * @note         None.
  *
  ******************************************************************************/
-static int read_char_sysfs_entry(char* base_filename, char* filepath, int id, char* value)
+static void read_char_sysfs_entry(char* base_filename, char* filepath, int id, char* value)
 {
 
 	FILE *fp;
@@ -479,8 +479,8 @@ static int read_char_sysfs_entry(char* base_filename, char* filepath, int id, ch
 
 	if(fp == NULL)
 	{
-		fprintf(fp_out, "Unable to open %s\n",filename);
-		exit(0);
+		fprintf(fp_out, "Failed to open %s\n", filename);
+		return;
 	}
 
 	if(fscanf(fp,"%s",value) != 1)
@@ -488,8 +488,6 @@ static int read_char_sysfs_entry(char* base_filename, char* filepath, int id, ch
                 fprintf(fp_out, "Failed to read sysfs entry\n");
 	}
 	fclose(fp);
-
-	return(0);
 
 }
 
@@ -543,7 +541,9 @@ int print_cpu_frequency(int verbose_flag)
 	for(; cpu_id < num_cpus_conf; cpu_id++)
 	{
 		get_cpu_frequency(cpu_id,&cpu_freq);
-		fprintf(fp_out, "CPU%d\t:    %f MHz\n",cpu_id,(cpu_freq)/1000);
+		if (cpu_freq != 0) {
+			fprintf(fp_out, "CPU%d\t:    %f MHz\n",cpu_id,(cpu_freq)/1000);
+		}
 	}
 	fprintf(fp_out, "\n");
 
@@ -1058,7 +1058,7 @@ int print_sysmon_power_info(int verbose_flag, int sample_interval, int sample_wi
 
 	if(hwmon_id == -1)
 	{
-		fprintf(fp_out, "no hwmon device found for ams under /sys/class/hwmon\n");
+		fprintf(fp_out, "no hwmon device found for ams under /sys/class/hwmon\n\n");
 		return(0);
 	}
 
